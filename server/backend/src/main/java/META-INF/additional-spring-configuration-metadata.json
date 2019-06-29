@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "general.timezoneid",
+    "type": "java.lang.String",
+    "description": "A description for 'general.timezoneid'"
+  },
+  {
+    "name": "workinghours.createUserIfUnknown",
+    "type": "java.lang.String",
+    "description": "A description for 'workinghours.createUserIfUnknown'"
+  },
+  {
+    "name": "thingspeak.climate.apiwritekey",
+    "type": "java.lang.String",
+    "description": "A description for 'thingspeak.climate.apiwritekey'"
+  },
+  {
+    "name": "thingspeak.climate.channelid",
+    "type": "java.lang.String",
+    "description": "A description for 'thingspeak.climate.channelid'"
+  },
+  {
+    "name": "stock.websiteurl",
+    "type": "java.lang.String",
+    "description": "A description for 'stock.websiteurl'"
+  },
+  {
+    "name": "general.rootusername",
+    "type": "java.lang.String",
+    "description": "A description for 'general.rootusername'"
+  },
+  {
+    "name": "general.rootuserpassword",
+    "type": "java.lang.String",
+    "description": "A description for 'general.rootuserpassword'"
+  }
+]}
