@@ -183,6 +183,18 @@ public class WorkingHoursController {
 			@RequestParam(name="event_time", required = false) String eventTimeUtc, @RequestParam(name="client", required=false) String client) {
 
 		LOG.debug("newWorkEvent()");
+
+		// temporary part to support current Arduino code. Remove it when Arduino sends event_time in UTC
+		if (eventTimeUtc == null)
+		{
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
+			eventTimeUtc = ZonedDateTime.now().format(formatter);
+		}
+		
+		if (client == null)
+		{
+			client = "unknown";
+		}
 		
 		Long rfidUid = Long.parseLong(rfidUidHex.replaceAll(":", ""), 16);
 
@@ -206,15 +218,6 @@ public class WorkingHoursController {
 				return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
 			}
 
-			if (eventTimeUtc == null)
-			{
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
-				eventTimeUtc = ZonedDateTime.now().format(formatter);
-			}
-			if (client == null)
-			{
-				client = "unknown";
-			}
 			Instant currentEventTime = Instant.parse(eventTimeUtc);
 
 			WorkEvent newEventForUser = new WorkEvent();
