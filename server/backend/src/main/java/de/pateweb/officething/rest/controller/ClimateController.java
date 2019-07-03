@@ -12,9 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -113,6 +115,29 @@ public class ClimateController {
 		response.setHumidity(climateResult.getHumidity());
 		response.setTemperature(climateResult.getTemperature());
 		return response;
+	}
+	
+	@GetMapping ("climate/last/{count}")
+	public List<ClimateDTO> getLastXclimates(@PathVariable String count) {
+		
+		List<ClimateDTO> climateDtoList = new ArrayList<>();
+
+		Iterable<Climate> climates = climateRepository.findByOrderByClimateUpdatedAtDesc(PageRequest.of(0, Integer.valueOf(count)));
+		
+		Iterator<Climate> it = climates.iterator();
+		while (it.hasNext()) {
+			
+			Climate result = it.next();
+			
+			ClimateDTO climateDTO = new ClimateDTO();
+			climateDTO.setClimateUpdatedAt(TemporalUtils.instantToUsersZdt(result.getClimateUpdatedAt()));
+			climateDTO.setHumidity(result.getHumidity());
+			climateDTO.setTemperature(result.getTemperature());
+			climateDtoList.add(climateDTO);
+		}
+
+		return climateDtoList;		
+		
 	}
 
 	@GetMapping("/climate")
