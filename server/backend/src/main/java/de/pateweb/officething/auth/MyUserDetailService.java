@@ -1,8 +1,5 @@
 package de.pateweb.officething.auth;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -54,9 +51,6 @@ public class MyUserDetailService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		DateFormat logDateFormat = new SimpleDateFormat("dd.MM.yyyyy HH:mm:ss");
-		String now = logDateFormat.format(new Date());
-		LOG.debug("login request of user: {} on {}", username, now);
 
 		if (username.equals(rootUserName)) {
 			User rootUser = new User();

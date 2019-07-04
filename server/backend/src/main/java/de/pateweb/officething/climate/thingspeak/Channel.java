@@ -23,35 +23,40 @@ public class Channel {
 	private RestTemplate restTemplate;
 
 	public Channel(Integer usedChannelId, String writeKey, String readKey) {
-		channelId = usedChannelId;
-		readAPIKey = readKey;
-		writeAPIKey = writeKey;
+		this.channelId = usedChannelId;
+		this.readAPIKey = readKey;
+		this.writeAPIKey = writeKey;
 
 		this.restTemplate = new RestTemplate();
 	}
 
 	public Integer updateEntry(Entry entry) {
-		
+
 		LOG.debug("updateEntry()");
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(APIHEADER, this.writeAPIKey);
 		headers.add("Connection", "close");
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(entry.getUpdateMap(), headers);
 
-		ResponseEntity<String> response = null;
+		Integer result = 0;
 
 		try {
 
-			response = restTemplate.postForEntity(APIURL, request, String.class);
-
+			ResponseEntity<String> response = restTemplate.postForEntity(APIURL, request, String.class);
+			result = Integer.valueOf(response.getBody());
+			
 			if (response.getStatusCodeValue() != 200)
+			{
 				LOG.error("Thingspeak update failed. Status code: {}", response.getStatusCodeValue());
-		} catch (Exception e) {
+			}
+
+		} catch (Exception e) 
+		{
 			LOG.error(e.getMessage());
 		}
 
-		return Integer.valueOf(response.getBody());
+		return result;
 	}
 }

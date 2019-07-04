@@ -1,1 +1,0 @@
-package de.pateweb.officething.workinghours.model;

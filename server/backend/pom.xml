@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>office-thing</groupId>
 	<artifactId>office-thing-application</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>office-thing-application</name>
 	<description>Backend for Office-Thing</description>
 

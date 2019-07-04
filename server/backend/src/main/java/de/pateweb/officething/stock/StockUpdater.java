@@ -39,9 +39,9 @@ public class StockUpdater {
 
 	@PostConstruct
 	public void doOnceAtStartup() {
-		
+
 		LOG.debug("stock, doOnceAtStartup()");
-		
+
 		checkStock();
 	}
 //      second, minute, hour, day, month, weekday
@@ -58,18 +58,22 @@ public class StockUpdater {
 	// Fire at every hour between 7-17h on Monday till Fryday
 	@Scheduled(cron = "0 0 6-17 * * MON-FRI")
 	public void checkStock() {
-		
+
 		LOG.debug("checkStock()");
-		
+
 		int retryCount = 0;
 
 		String result = requestStockValue();
 
 		// retry logic
 		while (result.equals("-1") && retryCount < 3) {
+
 			try {
+
 				TimeUnit.MINUTES.sleep(5);
+
 			} catch (InterruptedException ex) {
+
 				LOG.error("Error during retry #" + retryCount + " to request stock website. Delay failed: "
 						+ ex.getMessage());
 			}
@@ -83,23 +87,26 @@ public class StockUpdater {
 		try {
 			number = format.parse(result);
 		} catch (ParseException ex) {
-			LOG.error("Cannot parse stock value. " + ex.getMessage());
+			LOG.error("Cannot parse stock value. {}", ex.getMessage());
 		}
 
 		Float stockValue = number.floatValue();
-		LOG.debug("parsed value: " + stockValue);
+		LOG.info("parsed new stock value: {}", stockValue);
 
 		Optional<Stock> oldStockEntity = stockRepository.findById(1L);
 
 		Instant now = Instant.now();
-		
+
 		if (oldStockEntity.isPresent()) {
+			
 			Stock oldStock = oldStockEntity.get();
 			oldStock.setStockValue(stockValue);
 			oldStock.setStockUpdatedAt(now);
+			
 			stockRepository.save(oldStock);
-		} else
-		{
+			
+		} else {
+			
 			Stock stockEntity = new Stock();
 			stockEntity.setId(1L);
 			stockEntity.setStockValue(stockValue);
@@ -121,7 +128,7 @@ public class StockUpdater {
 			return doc.select("span[data-role=currentvalue]").text();
 
 		} catch (IOException e) {
-			LOG.error("Connection error to stock website. " + e.getMessage() + ". Retry in 5 Minutes.");
+			LOG.error("Connection error to stock website. {} Retry in 5 Minutes.", e.getMessage());
 			return "-1";
 		}
 

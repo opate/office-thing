@@ -10,11 +10,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import de.pateweb.officething.workinghours.model.User;
 
+/**
+ * Wrapper class for spring boot security
+ * 
+ * @author Octavian Pate
+ *
+ */
 public class MyUserPrincipal implements UserDetails{
 	
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = -8257612131533235117L;
 	
 	private final User user;
