@@ -9,13 +9,13 @@ import lombok.Data;
 @Data
 public class ClimateDTO {
 
-    private float humidity;
+    private Float humidity;
     
-    private float temperature;
+    private Float temperature;
     
-    private float pressure;
+    private Float pressure;
     
-    private float iaq;
+    private Float iaq;
     
     private String airQuality;
     

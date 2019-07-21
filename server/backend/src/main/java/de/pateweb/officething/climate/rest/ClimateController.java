@@ -91,7 +91,7 @@ public class ClimateController {
 		result.addEntry(Float.toString(climateResult.getHumidity()) + "%", "i3359");
 		result.addEntry(Float.toString(climateResult.getTemperature()) + "°", "i2056");
 		result.addEntry(Float.toString(climateResult.getPressureHpa()) + "hPa", "i2308");
-		result.addEntry(Float.toString(climateResult.getPressureHpa()) + "Air", "i2644");
+		result.addEntry(evaluateIaq(climateResult.getIaq()) + "Air", "i2644");
 		result.addEntry(updateTime + "h", "i2056");
 
 		return result;
@@ -114,13 +114,13 @@ public class ClimateController {
 		response.setClimateUpdatedAt(TemporalUtils.instantToUsersZdt(climateResult.getClimateUpdatedAt()));
 		response.setHumidity(climateResult.getHumidity());
 		response.setTemperature(climateResult.getTemperature());
-		if (climateResult.getPressureHpa() != null)
-			response.setPressure(climateResult.getPressureHpa());
+		response.setPressure(climateResult.getPressureHpa());
 		if (climateResult.getIaq() != null)
 		{
 			response.setIaq(climateResult.getIaq());
-			response.setAirQuality(evaluateIaq(climateResult.getIaq()));			
 		}
+		response.setAirQuality(evaluateIaq(climateResult.getIaq()));			
+		
 		return response;
 	}
 	
@@ -142,14 +142,14 @@ public class ClimateController {
 			climateDTO.setClimateUpdatedAt(TemporalUtils.instantToUsersZdt(result.getClimateUpdatedAt()));
 			climateDTO.setHumidity(result.getHumidity());
 			climateDTO.setTemperature(result.getTemperature());
-			if (result.getPressureHpa() != null)
-				climateDTO.setPressure(result.getPressureHpa());
+			climateDTO.setPressure(result.getPressureHpa());
 			
 			if (result.getIaq() != null)
 			{
 				climateDTO.setIaq(result.getIaq());
-				climateDTO.setAirQuality(evaluateIaq(result.getIaq()));					
 			}
+			climateDTO.setAirQuality(evaluateIaq(result.getIaq()));					
+			
 			climateDtoList.add(climateDTO);
 		}
 
@@ -173,13 +173,14 @@ public class ClimateController {
 			climateDTO.setClimateUpdatedAt(TemporalUtils.instantToUsersZdt(result.getClimateUpdatedAt()));
 			climateDTO.setHumidity(result.getHumidity());
 			climateDTO.setTemperature(result.getTemperature());
-			if (result.getPressureHpa() != null)
-				climateDTO.setPressure(result.getPressureHpa());
+			climateDTO.setPressure(result.getPressureHpa());
+
 			if (result.getIaq() != null)
 			{
 				climateDTO.setIaq(result.getIaq());
-				climateDTO.setAirQuality(evaluateIaq(result.getIaq()));
 			}
+			climateDTO.setAirQuality(evaluateIaq(result.getIaq()));
+			
 			climateDtoList.add(climateDTO);
 		}
 
@@ -188,7 +189,7 @@ public class ClimateController {
 
 	private String evaluateIaq (Float iaq)
 	{
-		  String evaluation = "N/A";
+		  String evaluation = "pending";
 		  
 		  if (iaq == null)
 			  return evaluation;

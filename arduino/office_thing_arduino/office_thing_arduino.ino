@@ -390,6 +390,7 @@ void loop() {
     postDataClimate += hum_dht22;
     postDataClimate += "&press=";
     postDataClimate += press;
+    
     if (currentTimeMillis > gasCalibrationDelayMills)
     {
       postDataClimate += "&gas=";
