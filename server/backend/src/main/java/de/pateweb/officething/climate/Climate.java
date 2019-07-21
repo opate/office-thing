@@ -26,10 +26,16 @@ public class Climate implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private float humidity;
+    private Float humidity;
     
-    private float temperature;
+    private Float temperature;
 
+    private Float pressureHpa;
+    
+    private Float gasKohm;
+    
+    private Float iaq;
+    
     @Basic
     private Instant climateUpdatedAt;
 	

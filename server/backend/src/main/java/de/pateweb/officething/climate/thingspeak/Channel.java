@@ -15,7 +15,7 @@ public class Channel {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Channel.class);
 
-	private String APIURL = "http://api.thingspeak.com/update";
+	private static final String APIURL = "http://api.thingspeak.com/update";
 	private static final String APIHEADER = "X-THINGSPEAKAPIKEY";
 	private final Integer channelId;
 	private String readAPIKey;
