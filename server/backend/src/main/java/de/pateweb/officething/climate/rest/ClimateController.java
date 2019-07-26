@@ -97,6 +97,75 @@ public class ClimateController {
 		return result;
 	}
 
+	@GetMapping ("/climate/iaq/last")
+	public IaqDTO getLastIaq() {
+		LOG.debug("getLastIaq()");
+		
+		List<ClimateDTO> last100Climates = getLastXclimates("100");
+		
+		IaqDTO result = new IaqDTO();
+		
+		for (ClimateDTO dto : last100Climates)
+		{
+			if (dto.getIaq() != null)
+			{
+				result.setAirQuality(dto.getAirQuality());
+				result.setIaq(dto.getIaq());
+				result.setClimateUpdatedAt(dto.getClimateUpdatedAt());
+				break;
+			}
+		}
+		
+		return result;
+	}
+	
+	@GetMapping ("/climate/iaq")
+	public List<IaqDTO> getAllIaqValues()
+	{
+		LOG.debug("getAllIaqValues()");
+		List<ClimateDTO> allClimates = getAllClimates();
+		
+		List<IaqDTO> results = new ArrayList<>();
+		
+		for (ClimateDTO dto : allClimates)
+		{
+			if (dto.getIaq() != null)
+			{
+				IaqDTO result = new IaqDTO();
+				result.setAirQuality(dto.getAirQuality());
+				result.setIaq(dto.getIaq());
+				result.setClimateUpdatedAt(dto.getClimateUpdatedAt());
+				results.add(result);
+			}
+		}
+		
+		return results;
+	}
+	
+	@GetMapping ("climate/iaq/last/{count}")
+	public List<IaqDTO> getLastXiaqs(@PathVariable String count)
+	{
+		LOG.debug("getLastXiaqs()");
+		
+		List<ClimateDTO> allClimates = getLastXclimates(count);
+		
+		List<IaqDTO> results = new ArrayList<>();
+		
+		for (ClimateDTO dto : allClimates)
+		{
+			if (dto.getIaq() != null)
+			{
+				IaqDTO result = new IaqDTO();
+				result.setAirQuality(dto.getAirQuality());
+				result.setIaq(dto.getIaq());
+				result.setClimateUpdatedAt(dto.getClimateUpdatedAt());
+				results.add(result);
+			}
+		}
+		
+		return results;		
+	}
+	
 	@GetMapping("/climate/last")
 	public ClimateDTO getLastClimate() {
 		
