@@ -76,8 +76,9 @@ int   getgasreference_count = 0;
 int intervalStockMillis = 30000;
 // 20 secs = 20000 ms
 int intervalClimateMillis = 20000;
-// 30 minutes = 1800000
-int gasCalibrationDelayMills = 1800000;
+// 30 minutes = 1.800.000 ms
+// 3 hours = 10.800.000 ms
+int gasCalibrationDelayMills = 10800000;
 
 unsigned long lastStockCheckMillis = 0;
 unsigned long lastClimateMillis = 0;
@@ -370,6 +371,8 @@ void loop() {
     }
     float temp = bme.temperature;
     float press = bme.pressure / 100.0;
+    // empric measurements stated that we have to correct pressure by adding 16 hPa
+    press = press + 16.0;
     float hum = bme.humidity;
     float gas = bme.gas_resistance / 1000.0;
     float iaq = calculateIaq();
