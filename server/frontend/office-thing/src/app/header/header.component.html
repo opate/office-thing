@@ -1,0 +1,20 @@
+<header>
+        <mat-toolbar color="primary">
+
+                <mat-toolbar-row>
+                    <span style="font-size: 20px; margin: 0 auto;">{{title}}</span>
+                </mat-toolbar-row>
+              
+                <mat-toolbar-row>
+
+                    <a mat-button [routerLink]="'/'"> Home </a>
+                    <a *ngIf="loginService.isUserLoggedIn()" mat-button [routerLink]="'/workperiod'"> Work Periods </a>
+                    <a *ngIf="loginService.isUserLoggedIn()" mat-button [routerLink]="'/user'"> User </a>
+                    <a *ngIf="!loginService.isUserLoggedIn()" mat-button [routerLink]="'/login'"> Login </a>
+                    <a *ngIf="loginService.isUserLoggedIn()" mat-button [routerLink]="'/logout'"> Logout </a>
+              
+                </mat-toolbar-row>
+              
+        </mat-toolbar>
+        
+</header>

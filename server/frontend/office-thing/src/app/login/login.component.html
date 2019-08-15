@@ -1,0 +1,14 @@
+<div class="container" style="padding: 2em; margin: auto; text-align: center">
+
+        <div style="font: 500 15px/32px Roboto,Helvetica Neue,sans-serif;">Email / User Name</div>  
+        <input style="font: 400 15px/20px Roboto,Helvetica Neue,sans-serif;" type="text" name="username" [(ngModel)]="username">
+        
+        <div style="margin-top: 0.5em; font: 500 15px/32px Roboto,Helvetica Neue,sans-serif;">Password</div>
+        <input style="font: 400 15px/20px Roboto,Helvetica Neue,sans-serif;" type="password" name="password" [(ngModel)]="password">
+
+    <div>
+        <button (click)=checkLogin() class="btn btn-success" style="margin-top: 1em; ">
+          Login
+        </button>
+    </div>
+</div>

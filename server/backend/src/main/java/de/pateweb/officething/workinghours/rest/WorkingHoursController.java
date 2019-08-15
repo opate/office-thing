@@ -40,7 +40,6 @@ import de.pateweb.officething.workinghours.model.User;
 import de.pateweb.officething.workinghours.model.WorkEvent;
 import de.pateweb.officething.workinghours.model.WorkPeriod;
 
-@RestController
 public class WorkingHoursController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WorkingHoursController.class);
@@ -82,6 +81,8 @@ public class WorkingHoursController {
 	@Autowired
 	RfidTagInUseRepository rfidTagInUseRespository;
 
+
+	
 	/**
 	 * Fast preview in browser as JSON
 	 * 
@@ -162,7 +163,6 @@ public class WorkingHoursController {
 	 * @return
 	 */
 	@GetMapping("/workinghoursusers")
-	@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 	public List<User> getWorkingHoursUser() {
 		
 		LOG.debug("getWorkingHoursUser()");
