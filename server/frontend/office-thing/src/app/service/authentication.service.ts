@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClientService } from './http-client.service';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 
 export class User{
   constructor(
-    public status:string,
+    public customerId: number,
+    public email: string,
+    public name: string,
+    public given_name: string,
+    public role:string,
      ) {}
   
 }
@@ -21,27 +24,20 @@ export class AuthenticationService {
      }
 
   authenticate(username, password) {
-/*
-    if (username === "javainuse" && password === "password") {
-      sessionStorage.setItem('username', username)
-      return true;
-    } else {
-      return false;
-    }
-*/
-
-const headers = new HttpHeaders({ Authorization: 'Basic ' + btoa(username + ':' + password) });
-return this.httpClient.get<User>('http://localhost:9090/validateLogin',{headers}).pipe(
- map(
-   userData => {
-    sessionStorage.setItem('username',username);
-    let authString = 'Basic ' + btoa(username + ':' + password);
-    sessionStorage.setItem('basicauth', authString);    
-    return userData;
-   }
- )
-
-);
+    const headers = new HttpHeaders({ Authorization: 'Basic ' + btoa(username + ':' + password) });
+    /*
+     http://127.0.0.1:9090/ui/workinghours/validateLogin'
+    */
+    return this.httpClient.get<User>('https://www.pateweb.de/ui/workinghours/validateLogin',{headers}).pipe(
+        map(
+          userData => {
+            sessionStorage.setItem('username',username);
+            let authString = 'Basic ' + btoa(username + ':' + password);
+            sessionStorage.setItem('basicauth', authString);    
+            return userData;
+          }
+        )
+    );
   }
 
   isUserLoggedIn() {
@@ -53,4 +49,5 @@ return this.httpClient.get<User>('http://localhost:9090/validateLogin',{headers}
   logOut() {
     sessionStorage.removeItem('username')
   }
+
 }

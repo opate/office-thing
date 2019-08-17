@@ -2,12 +2,9 @@ package de.pateweb.officething.workinghours.rest;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -16,15 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import de.pateweb.officething.workinghours.UserRole;
 import de.pateweb.officething.workinghours.dao.CustomerRepository;
@@ -40,24 +31,23 @@ import de.pateweb.officething.workinghours.model.User;
 import de.pateweb.officething.workinghours.model.WorkEvent;
 import de.pateweb.officething.workinghours.model.WorkPeriod;
 
+/**
+ * REST endpoints for office-thing iot
+ * 
+ * @author Octavian Pate
+ *
+ */
 public class WorkingHoursController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WorkingHoursController.class);
 
-	private final String UNAUTHORIZED = "Unauthorized";
+	private static final String UNAUTHORIZED = "Unauthorized";
 	
 	private Boolean createUserIfUnknown;
-
-	private String timeZoneId;
 
 	@Value("${workinghours.createUserIfUnknown}")
 	public void setCreateUserIfUnknown(Boolean create) {
 		createUserIfUnknown = create;
-	}
-
-	@Value("${general.timezoneid}")
-	public void setTimeZoneId(String zoneId) {
-		timeZoneId = zoneId;
 	}
 
 	@Autowired
@@ -80,95 +70,6 @@ public class WorkingHoursController {
 
 	@Autowired
 	RfidTagInUseRepository rfidTagInUseRespository;
-
-
-	
-	/**
-	 * Fast preview in browser as JSON
-	 * 
-	 * @return
-	 */
-	@GetMapping("/workperiod")
-	public ResponseEntity<?> getWorkPeriodPerUser() {
-		
-		LOG.info("getWorkPeriodPerUser()");
-		
-		String currentUserEmail = "";
-
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		
-		if (!(authentication instanceof AnonymousAuthenticationToken)) {
-			currentUserEmail = authentication.getName();
-			LOG.info("user: {}", currentUserEmail);
-		} else {
-			return new ResponseEntity<>(UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
-		}
-
-		if (!currentUserEmail.isEmpty()) {
-
-			List<WorkPeriodWebDTO> returnList = getWorkPeriodWebDtoList(currentUserEmail);
-			return new ResponseEntity<>(returnList, HttpStatus.OK);
-
-		} else {
-			return new ResponseEntity<>(UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
-		}
-
-	}
-
-	private List<WorkPeriodWebDTO> getWorkPeriodWebDtoList(String currentUserEmail) {
-		
-		Long hours; 
-		Long minutes; 
-		Long seconds;
-		String duration;
-		ZonedDateTime finish;
-
-		List<WorkPeriodWebDTO> returnList = new ArrayList<>();
-		
-		Optional<User> userCandidate = userRepository.findFirstByEmail(currentUserEmail);
-
-		if (userCandidate.isPresent()) {
-			User user = userCandidate.get();
-			List<WorkPeriod> findAllByRfidUidInOrderByWorkDateDesc = workPeriodRepository
-					.findAllByRfidUidInOrderByWorkDateDesc(user.getCurrentRfidTag().getRfidUid());
-
-			for (WorkPeriod e : findAllByRfidUidInOrderByWorkDateDesc) {
-				Long totalSecs = e.getWorkDurationSeconds();
-
-				duration = "";
-				finish = null;
-
-				if (totalSecs != null) {
-					hours = totalSecs / 3600;
-					minutes = (totalSecs % 3600) / 60;
-					seconds = totalSecs % 60;
-					duration = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-					finish = ZonedDateTime.ofInstant(e.getWorkFinish(), ZoneId.of(timeZoneId));
-				}
-
-				WorkPeriodWebDTO newWebDTO = new WorkPeriodWebDTO();
-				newWebDTO.setWorkDuration(duration);
-				newWebDTO.setWorkFinish(finish);
-				newWebDTO.setWorkStart(ZonedDateTime.ofInstant(e.getWorkStart(), ZoneId.of(timeZoneId)));
-				returnList.add(newWebDTO);
-			}
-		}
-		
-		return returnList;
-	}
-
-	/**
-	 * just for com test with angular
-	 * 
-	 * @return
-	 */
-	@GetMapping("/workinghoursusers")
-	public List<User> getWorkingHoursUser() {
-		
-		LOG.debug("getWorkingHoursUser()");
-		
-		return (List<User>) userRepository.findAll();
-	}
 
 	/**
 	 * 

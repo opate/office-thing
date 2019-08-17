@@ -1,6 +1,9 @@
 <div style="padding: 2em; margin: auto; text-align: center">
     WELCOME <br><br> 
-    <a *ngIf="!loginService.isUserLoggedIn()" [routerLink]="'/login'">Please log in </a>
+    <div *ngIf="!loginService.isUserLoggedIn()" >
+        Please <a [routerLink]="'/login'">log in </a>
+    </div>
+
 </div>
 
 

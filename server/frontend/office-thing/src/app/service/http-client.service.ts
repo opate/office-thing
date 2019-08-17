@@ -11,7 +11,7 @@ export class WorkPeriod{
     public workDate: string,
     public workStart: string,
     public workFinish: string,
-    public workDurationSeconds: number
+    public workDuration: string
   ) {}
 }
 
@@ -25,6 +25,9 @@ export class HttpClientService {
 
   getWorkPeriods()
   {
-    return this.httpClient.get<WorkPeriod[]>('http://localhost:9090/allworkperiods');
+    return this.httpClient.get<WorkPeriod[]>('https://www.pateweb.de/ui/workinghours/workperiod');
+    /*
+    return this.httpClient.get<WorkPeriod[]>('https://127.0.0.1:9090/ui/workinghours/workperiod');
+    */
   }
 }

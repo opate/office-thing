@@ -1,28 +1,28 @@
 <table style="width: 75%" mat-table [dataSource]="workperiods">
 
   <ng-container matColumnDef="rfid">
-    <th mat-header-cell *matHeaderCellDef> RFID UID </th>
+    <th mat-header-cell *matHeaderCellDef> RFID </th>
     <td mat-cell *matCellDef="let element"> {{element.rfidUid}} </td>
   </ng-container>
 
   <ng-container matColumnDef="workDate">
     <th mat-header-cell *matHeaderCellDef> Date </th>
-    <td mat-cell *matCellDef="let element"> {{element.workDate | date }} </td>
+    <td mat-cell *matCellDef="let element"> {{element.workStart | date:'EEEE, d.M.yyyy' }} </td>
   </ng-container>
 
   <ng-container matColumnDef="workStart">
     <th  mat-header-cell *matHeaderCellDef> Start </th>
-    <td mat-cell *matCellDef="let element"> {{element.workStart | date:'H:mm:ss':'UTC' }} </td>
+    <td mat-cell *matCellDef="let element"> {{element.workStart | date:'H:mm' }} </td>
   </ng-container>
 
   <ng-container matColumnDef="workFinish">
     <th mat-header-cell *matHeaderCellDef> Finish </th>
-    <td mat-cell *matCellDef="let element"> {{element.workFinish | date:'H:mm:ss':'UTC' }} </td>
+    <td mat-cell *matCellDef="let element"> {{element.workFinish | date:'H:mm (d.M.yyyy)' }} </td>
   </ng-container>
 
-  <ng-container matColumnDef="workDurationSeconds">
+  <ng-container matColumnDef="workDuration">
     <th mat-header-cell *matHeaderCellDef> Duration </th>
-    <td mat-cell *matCellDef="let element"> {{element.workDurationSeconds }} </td>
+    <td mat-cell *matCellDef="let element"> {{element.workDuration }} </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -9,10 +9,13 @@ import { AuthenticationService } from '../service/authentication.service';
 export class HeaderComponent implements OnInit {
 
   title = 'Working Hours';
+  
+  constructor(public loginService:AuthenticationService) {
 
-  constructor(private loginService:AuthenticationService) { }
+  }
 
   ngOnInit() {
+
   }
 
 }
