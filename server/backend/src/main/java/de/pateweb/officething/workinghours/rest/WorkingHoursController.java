@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.pateweb.officething.workinghours.UserRole;
 import de.pateweb.officething.workinghours.dao.CustomerRepository;
@@ -37,6 +39,8 @@ import de.pateweb.officething.workinghours.model.WorkPeriod;
  * @author Octavian Pate
  *
  */
+@CrossOrigin()
+@RestController
 public class WorkingHoursController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WorkingHoursController.class);
