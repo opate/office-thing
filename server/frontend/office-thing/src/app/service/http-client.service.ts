@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
+import { environment } from '../../environments/environment';
+
+/*
 @Injectable({
   providedIn: 'root'
 })
+*/
 
 export class WorkPeriod{
   constructor(
@@ -17,6 +21,8 @@ export class WorkPeriod{
 
 export class HttpClientService {
 
+  baseUrl = environment.baseUrl;
+
   constructor(
 
     private httpClient:HttpClient
@@ -25,9 +31,7 @@ export class HttpClientService {
 
   getWorkPeriods()
   {
-    return this.httpClient.get<WorkPeriod[]>('https://www.pateweb.de/ui/workinghours/workperiod');
-    /*
-    return this.httpClient.get<WorkPeriod[]>('https://127.0.0.1:9090/ui/workinghours/workperiod');
-    */
+    let url = '/workperiod';
+    return this.httpClient.get<WorkPeriod[]>(url);
   }
 }

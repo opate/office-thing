@@ -51,7 +51,6 @@ import { BasicAuthHttpInterceptorService } from './service/basic-auth-http-inter
       provide:HTTP_INTERCEPTORS, useClass:BasicAuthHttpInterceptorService, multi:true 
     },
     HttpClientService
-    
   ],
   bootstrap: [AppComponent]
 })

@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler } from '@angular/common/http';
-import { AuthenticationService } from './authentication.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class BasicAuthHttpInterceptorService implements HttpInterceptor {
+
+  baseUrl = environment.baseUrl;
 
   constructor() { }
 
@@ -20,7 +22,8 @@ export class BasicAuthHttpInterceptorService implements HttpInterceptor {
       })
     }
 
-    return next.handle(req);
+    const apiReq = req.clone({ url: `${this.baseUrl}${req.url}` });
+    return next.handle(apiReq);
 
   }
 }

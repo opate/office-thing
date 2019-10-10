@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export class User{
   constructor(
@@ -18,6 +19,8 @@ export class User{
 })
 export class AuthenticationService {
 
+  baseUrl = environment.baseUrl;
+
   constructor(
     private httpClient:HttpClient
   ) { 
@@ -25,10 +28,9 @@ export class AuthenticationService {
 
   authenticate(username, password) {
     const headers = new HttpHeaders({ Authorization: 'Basic ' + btoa(username + ':' + password) });
-    /*
-     http://127.0.0.1:9090/ui/workinghours/validateLogin'
-    */
-    return this.httpClient.get<User>('https://www.pateweb.de/ui/workinghours/validateLogin',{headers}).pipe(
+    
+    let url = '/validateLogin';
+    return this.httpClient.get<User>(url,{headers}).pipe(
         map(
           userData => {
             sessionStorage.setItem('username',username);
@@ -42,7 +44,6 @@ export class AuthenticationService {
 
   isUserLoggedIn() {
     let user = sessionStorage.getItem('username')
-    console.log(!(user === null))
     return !(user === null)
   }
 

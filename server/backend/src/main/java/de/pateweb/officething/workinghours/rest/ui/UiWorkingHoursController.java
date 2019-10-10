@@ -77,8 +77,7 @@ public class UiWorkingHoursController {
 
 	}
 
-	@GetMapping(produces = "application/json")
-	@RequestMapping({"/validateLogin"})
+	@GetMapping(value="/validateLogin", produces = "application/json")
 	public ResponseEntity<?> validateLogin() {
 
 		LOG.info("ui.validateLogin()");
