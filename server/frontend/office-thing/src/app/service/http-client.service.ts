@@ -1,13 +1,4 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-
-import { environment } from '../../environments/environment';
-
-/*
-@Injectable({
-  providedIn: 'root'
-})
-*/
 
 export class WorkPeriod{
   constructor(
@@ -20,8 +11,6 @@ export class WorkPeriod{
 }
 
 export class HttpClientService {
-
-  baseUrl = environment.baseUrl;
 
   constructor(
 

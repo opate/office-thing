@@ -1,1 +1,39 @@
-<p>user works!</p>
+<mat-card>
+
+    <table style="margin-left: 30px; margin-top: 30px">
+        <tbody>
+            <col width="190">
+            <col width="600">
+
+            <tr>
+                <td style="font-weight:bold">Given name</td>
+                <td>{{ currentUser.givenName }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Name</td>
+                <td>{{ currentUser.name }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Role</td>
+                <td>{{ currentUser.role }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Rights</td>
+                <td>{{ currentUser.rights }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Customer ID</td>
+                <td>{{ currentUser.customerId }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">User ID</td>
+                <td>{{ currentUser.userId }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Email</td>
+                <td>{{ currentUser.email }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</mat-card>

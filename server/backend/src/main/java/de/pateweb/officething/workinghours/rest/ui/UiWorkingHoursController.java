@@ -53,7 +53,7 @@ public class UiWorkingHoursController {
 	@GetMapping("/workperiod")
 	public ResponseEntity<?> getWorkPeriodPerUser() {
 
-		LOG.info("ui.getWorkPeriodPerUser()");
+		LOG.debug("ui.getWorkPeriodPerUser()");
 
 		String currentUserEmail = "";
 
@@ -77,18 +77,17 @@ public class UiWorkingHoursController {
 
 	}
 
-	@GetMapping(value="/validateLogin", produces = "application/json")
+	@GetMapping(value = "/validateLogin", produces = "application/json")
 	public ResponseEntity<?> validateLogin() {
 
-		LOG.info("ui.validateLogin()");
+		LOG.debug("ui.validateLogin()");
 
 		String currentUserEmail = "";
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		if (!(authentication instanceof AnonymousAuthenticationToken)) 
-		{
-		
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+
 			currentUserEmail = authentication.getName();
 			LOG.info("user: {}", currentUserEmail);
 
@@ -97,14 +96,18 @@ public class UiWorkingHoursController {
 			UiUser currentUser = new UiUser();
 			currentUser.setCustomerId(user.getCustomer().getId());
 			currentUser.setEmail(currentUserEmail);
-			currentUser.setGiven_name(user.getGivenName());
+			currentUser.setGivenName(user.getGivenName());
 			currentUser.setName(user.getName());
-			currentUser.setRole(user.getRole());
+			currentUser.setRole(user.getRole().toString());
+			currentUser.setRights(new ArrayList<>());
+			currentUser.setUserId(user.getId());
+			currentUser.setPassword(new String());
 
 			return new ResponseEntity<>(currentUser, HttpStatus.OK);
 
-		} else 
+		} else {
 			return new ResponseEntity<>(UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+		}
 
 	}
 

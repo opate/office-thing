@@ -9,7 +9,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpClientService } from './service/http-client.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTableModule } from '@angular/material';
+import { MatTableModule, MatCardModule, MatPaginator } from '@angular/material';
 import { MatToolbarModule, MatIconModule, MatSidenavModule, MatListModule, MatButtonModule } from  '@angular/material';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { LoginComponent } from './login/login.component';
@@ -19,6 +19,7 @@ import { FooterComponent } from './footer/footer.component';
 import { FormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { BasicAuthHttpInterceptorService } from './service/basic-auth-http-interceptor.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,10 @@ import { BasicAuthHttpInterceptorService } from './service/basic-auth-http-inter
     MatSidenavModule,
     MatListModule,
     MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
     MatIconModule,
+    MatCardModule,
     FlexLayoutModule,
     FormsModule
   ],

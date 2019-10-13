@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -61,58 +62,49 @@ public class StockUpdater {
 
 		LOG.debug("checkStock()");
 
-		int retryCount = 0;
-
 		String result = requestStockValue();
 
-		// retry logic
-		while (result.equals("-1") && retryCount < 3) {
+		if (!result.equals("-1")) {
 
+			NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+			Number number = -1;
+			
 			try {
-
-				TimeUnit.MINUTES.sleep(5);
-
-			} catch (InterruptedException ex) {
-
-				LOG.error("Error during retry #" + retryCount + " to request stock website. Delay failed: "
-						+ ex.getMessage());
+				number = format.parse(result);
+			} catch (ParseException ex) {
+				LOG.error("Cannot parse stock value. {}", ex.getMessage());
+				return;
 			}
 
-			result = requestStockValue();
-			retryCount++;
+			Float stockValue = number.floatValue();
+			LOG.info("parsed new stock value: {}", stockValue);
+
+			Optional<Stock> oldStockEntity = stockRepository.findById(1L);
+
+			Instant now = Instant.now();
+
+			if (oldStockEntity.isPresent()) {
+
+				Stock oldStock = oldStockEntity.get();
+				oldStock.setStockValue(stockValue);
+				oldStock.setStockUpdatedAt(now);
+
+				stockRepository.save(oldStock);
+
+			} else {
+
+				Stock stockEntity = new Stock();
+				stockEntity.setId(1L);
+				stockEntity.setStockValue(stockValue);
+				stockEntity.setStockUpdatedAt(now);
+
+				stockRepository.save(stockEntity);
+			}
+
 		}
-
-		NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
-		Number number = -1;
-		try {
-			number = format.parse(result);
-		} catch (ParseException ex) {
-			LOG.error("Cannot parse stock value. {}", ex.getMessage());
-		}
-
-		Float stockValue = number.floatValue();
-		LOG.info("parsed new stock value: {}", stockValue);
-
-		Optional<Stock> oldStockEntity = stockRepository.findById(1L);
-
-		Instant now = Instant.now();
-
-		if (oldStockEntity.isPresent()) {
-			
-			Stock oldStock = oldStockEntity.get();
-			oldStock.setStockValue(stockValue);
-			oldStock.setStockUpdatedAt(now);
-			
-			stockRepository.save(oldStock);
-			
-		} else {
-			
-			Stock stockEntity = new Stock();
-			stockEntity.setId(1L);
-			stockEntity.setStockValue(stockValue);
-			stockEntity.setStockUpdatedAt(now);
-
-			stockRepository.save(stockEntity);
+		else
+		{
+			LOG.warn("Cannot get stock value. Next try in 1 hour.");
 		}
 	}
 
@@ -128,7 +120,7 @@ public class StockUpdater {
 			return doc.select("span[data-role=currentvalue]").text();
 
 		} catch (IOException e) {
-			LOG.error("Connection error to stock website. {} Retry in 5 Minutes.", e.getMessage());
+			LOG.error("Connection error to stock website. {}", e.getMessage());
 			return "-1";
 		}
 

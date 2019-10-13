@@ -27,6 +27,6 @@ export class WorkPeriodComponent implements OnInit {
       this.workperiods=response;
   }
 
-  displayedColumns: string[] = ['rfid', 'workDate', 'workStart', 'workFinish', 'workDuration'];
+  displayedColumns: string[] = ['rfid', 'workDate', 'workStart', 'workFinish', 'workDuration', 'action'];
   
 }
