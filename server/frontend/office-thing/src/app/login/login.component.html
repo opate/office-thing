@@ -1,14 +1,25 @@
-<div class="container" style="padding: 2em; margin: auto; text-align: center">
+<mat-card style="margin-top: 20px">
+  <form class="example-form">
 
-        <div style="font: 500 15px/32px Roboto,Helvetica Neue,sans-serif;">Email / User Name</div>  
-        <input style="font: 400 15px/20px Roboto,Helvetica Neue,sans-serif;" type="text" name="username" [(ngModel)]="username">
-        
-        <div style="margin-top: 0.5em; font: 500 15px/32px Roboto,Helvetica Neue,sans-serif;">Password</div>
-        <input style="font: 400 15px/20px Roboto,Helvetica Neue,sans-serif;" type="password" name="password" [(ngModel)]="password">
+    <mat-card-content>
+      <mat-form-field>
+        <input matInput placeholder="Email" type="email" name="username" [(ngModel)]="username">
+      </mat-form-field>
+
+      <div>
+        <mat-form-field>
+          <input matInput placeholder="Password" type="password" name="password" [(ngModel)]="password">
+        </mat-form-field>
+      </div>
+
+    </mat-card-content>
 
     <div>
-        <button (click)=checkLogin() class="btn btn-success" style="margin-top: 1em; ">
-          Login
-        </button>
+      <button (click)=checkLogin() mat-raised-button>
+        Login
+      </button>
     </div>
-</div>
+
+  </form>
+
+</mat-card>

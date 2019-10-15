@@ -8,7 +8,8 @@ import { HomeComponent } from './home/home.component';
 import { AuthGuardService } from './service/auth-guard.service';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent},
+  { path: '', component: LoginComponent},
+  { path: 'workinghours', component: LoginComponent},
   { path:'workperiod', component: WorkPeriodComponent, canActivate:[AuthGuardService] },
   { path:'user', component: UserComponent, canActivate:[AuthGuardService] },
   { path:'login', component: LoginComponent },
