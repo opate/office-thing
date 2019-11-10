@@ -22,6 +22,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { BasicAuthHttpInterceptorService } from './service/basic-auth-http-interceptor.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { LiveComponent } from './live/live.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     LogoutComponent,
     HeaderComponent,
     FooterComponent,
-    HomeComponent
+    HomeComponent,
+    LiveComponent
   ],
   imports: [
     BrowserModule,
