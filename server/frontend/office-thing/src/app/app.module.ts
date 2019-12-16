@@ -9,7 +9,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpClientService } from './service/http-client.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTableModule, MatCardModule, MatPaginator } from '@angular/material';
+import { MatTableModule, MatCardModule, MatDialogModule } from '@angular/material';
 import { MatToolbarModule, MatIconModule, MatSidenavModule, MatListModule, MatButtonModule } from  '@angular/material';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material';
@@ -23,6 +23,7 @@ import { HomeComponent } from './home/home.component';
 import { BasicAuthHttpInterceptorService } from './service/basic-auth-http-interceptor.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LiveComponent } from './live/live.component';
+import { DialogBoxComponent } from './dialog-box/dialog-box.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { LiveComponent } from './live/live.component';
     HeaderComponent,
     FooterComponent,
     HomeComponent,
-    LiveComponent
+    LiveComponent,
+    DialogBoxComponent
   ],
   imports: [
     BrowserModule,
@@ -45,6 +47,7 @@ import { LiveComponent } from './live/live.component';
     MatCheckboxModule,
     MatToolbarModule,
     MatSidenavModule,
+    MatDialogModule,
     MatListModule,
     MatInputModule,
     MatButtonModule,
@@ -56,6 +59,9 @@ import { LiveComponent } from './live/live.component';
     FlexLayoutModule,
     FormsModule,
     ReactiveFormsModule
+  ],
+  entryComponents: [
+    DialogBoxComponent
   ],
   providers: [
     {  

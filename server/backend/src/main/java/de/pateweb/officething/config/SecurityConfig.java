@@ -53,9 +53,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 //        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-        source.registerCorsConfiguration("http://localhost:4200", new CorsConfiguration().applyPermitDefaultValues());
-        return source;
-    }    
+        source.registerCorsConfiguration("/ui/workinghours/*", new CorsConfiguration().applyPermitDefaultValues());
+//        source.registerCorsConfiguration("http://localhost:4200", new CorsConfiguration().applyPermitDefaultValues());
+        return source;         
+    }  
+    
     
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {

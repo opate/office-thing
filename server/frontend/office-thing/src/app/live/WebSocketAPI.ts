@@ -40,7 +40,7 @@ export class WebSocketAPI {
 
  /**
   * Send message to sever via web socket
-  * @param {*} message 
+  * @param {*} message  
   */
     _send(message) {
         console.log("calling logout api via web socket");

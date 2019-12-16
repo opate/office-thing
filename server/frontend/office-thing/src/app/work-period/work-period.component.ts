@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClientService, WorkPeriod } from '../service/http-client.service';
+import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
+import { MatDialog } from '@angular/material';
 
 @Component({
   selector: 'app-work-period',
@@ -13,7 +15,8 @@ export class WorkPeriodComponent implements OnInit {
 
   constructor(
 
-    private httpClientService:HttpClientService
+    private httpClientService:HttpClientService,
+    public dialog: MatDialog
   
     ) { }
 
@@ -29,4 +32,13 @@ export class WorkPeriodComponent implements OnInit {
 
   displayedColumns: string[] = ['rfid', 'workDate', 'workStart', 'workFinish', 'workDuration', 'action'];
   
+
+  openDialog(action,obj) {
+    obj.action = action;
+    const dialogRef = this.dialog.open(DialogBoxComponent, {
+      width: '250px',
+      data:obj
+    });
+ 
+  } 
 }

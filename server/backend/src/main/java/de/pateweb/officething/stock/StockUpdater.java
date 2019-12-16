@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -43,7 +41,11 @@ public class StockUpdater {
 
 		LOG.debug("stock, doOnceAtStartup()");
 
-		checkStock();
+		try {
+			checkStock();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 //      second, minute, hour, day, month, weekday
 //      "0 0 * * * *" = the top of every hour of every day.
@@ -58,12 +60,22 @@ public class StockUpdater {
 
 	// Fire at every hour between 7-17h on Monday till Fryday
 	@Scheduled(cron = "0 0 6-17 * * MON-FRI")
-	public void checkStock() {
+	public void checkStock() throws InterruptedException {
 
 		LOG.debug("checkStock()");
-
+		
+		int tryCount = 1;
+		
 		String result = requestStockValue();
-
+		
+		while (tryCount < 4 && result.equals("-1"))
+		{
+			LOG.error("Cannot get stock value. Retry in 5 minutes.");
+			tryCount++;
+			Thread.sleep(1000 * 60 * 5);
+			result = requestStockValue();
+		}
+			
 		if (!result.equals("-1")) {
 
 			NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
@@ -104,7 +116,7 @@ public class StockUpdater {
 		}
 		else
 		{
-			LOG.warn("Cannot get stock value. Next try in 1 hour.");
+			LOG.error("Cannot get stock value.");
 		}
 	}
 
