@@ -76,9 +76,8 @@ int   getgasreference_count = 0;
 int intervalStockMillis = 30000;
 // 20 secs = 20000 ms
 int intervalClimateMillis = 20000;
-// 30 minutes = 1.800.000 ms
-// 3 hours = 10.800.000 ms
-int gasCalibrationDelayMills = 10800000;
+// 30 minutes = 1800000
+int gasCalibrationDelayMills = 1800000;
 
 unsigned long lastStockCheckMillis = 0;
 unsigned long lastClimateMillis = 0;
@@ -145,6 +144,7 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
 
   // initialize BME680
+  while (!Serial);
   Serial.println(F("BME680 test"));
 
   if (!bme.begin()) {
@@ -157,7 +157,7 @@ void setup() {
   bme.setHumidityOversampling(BME680_OS_2X);
   bme.setPressureOversampling(BME680_OS_4X);
   bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  bme.setGasHeater(320, 150); // 320*C for 150 ms  
+  bme.setGasHeater(320, 150); // 320*C for 150 ms
 
   // everything ok, setup finished
   digitalWrite(LED_RED, LOW);
@@ -206,10 +206,10 @@ void loop() {
 
     String postData = "/officething/workevent?rfid_uid=";
     postData += id;
-    
+
     Serial.println("Making POST request for RFID event:");
     Serial.println(postData);
-    
+
     client.beginRequest();
     client.post(postData);
     client.sendHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -287,7 +287,7 @@ void loop() {
     String getData = "/officething/stock";
 
     Serial.println("Making GET request for stock:");
-    Serial.println(getData);    
+    Serial.println(getData);
 
     client.beginRequest();
     client.get(getData);
@@ -305,53 +305,57 @@ void loop() {
     Serial.println(responseGet);
     client.stop();
 
-    const size_t capacity = JSON_OBJECT_SIZE(3); //root object has three elements
-    DynamicJsonDocument doc(capacity);
-    deserializeJson(doc, responseGet);
-
-    float value = doc["stockValue"];
-    int val = value * 1000;
-
     // default position, 12 o'clock position
     int pos = 90;
 
-    //evalutate and map response stock value to printed range
-    if ((val > 0) & (val <= 10000)) {
-      if ((val > 0) && (val <= 2000)) {
-        pos = map(val, 0, 2000, 0, 18);
-      } else if ((val > 2000) && (val <= 4000)) {
-        pos = map(val, 2000, 4000, 18, 45);
-      } else if ((val > 4000) && (val <= 6000)) {
-        pos = map(val, 4000, 6000, 45, 81);
-      } else if ((val > 6000) && (val <= 8000)) {
-        pos = map(val, 6000, 8000, 81, 126);
-      } else if ((val > 8000) && (val <= 10000)) {
-        pos = map(val, 8000, 10000, 126, 180);
-      }
+    // evaluate http request result
+    if (statusCodeGet == 200) {
 
-      Serial.print("servo position: ");
-      Serial.println(pos);
-
-      //everything ok, set interval (back) to 1 hour
-      intervalStockMillis = 3600000;
-
-    } else {
+      const size_t capacity = JSON_OBJECT_SIZE(3); //root object has three elements
+      DynamicJsonDocument doc(capacity);
+      deserializeJson(doc, responseGet);
+  
+      float value = doc["stockValue"];
+      int val = value * 1000;
+  
+      //evalutate and map response stock value to printed range
+      if ((val > 0) & (val <= 10000)) {
+        if ((val > 0) && (val <= 2000)) {
+          pos = map(val, 0, 2000, 0, 18);
+        } else if ((val > 2000) && (val <= 4000)) {
+          pos = map(val, 2000, 4000, 18, 45);
+        } else if ((val > 4000) && (val <= 6000)) {
+          pos = map(val, 4000, 6000, 45, 81);
+        } else if ((val > 6000) && (val <= 8000)) {
+          pos = map(val, 6000, 8000, 81, 126);
+        } else if ((val > 8000) && (val <= 10000)) {
+          pos = map(val, 8000, 10000, 126, 180);
+        }
+  
+        Serial.print("servo position: ");
+        Serial.println(pos);
+  
+        //everything ok, set interval (back) to 1 hour
+        intervalStockMillis = 3600000;
+        myServo.write(180 - pos);
+      } 
+    }
+    // status code is not 200
+    else {
       Serial.println("Stock value mapping error. Try again in 1 minute.");
 
+      //something went wrong requesting the value, try again in 1 minute
       // set check interval to 60 sec
       intervalStockMillis = 60000;
-      //something went wrong requesting the value, try again in 1 minute
     }
 
-    myServo.write(180 - pos);
     digitalWrite(LED_RED, LOW);
-    return;
   }
 
   // Step 3 of 3
   // Send current climate informations.
 
-  if (currentTimeMillis - lastClimateMillis >= intervalClimateMillis) 
+  if (currentTimeMillis - lastClimateMillis >= intervalClimateMillis)
   {
     digitalWrite(LED_RED, HIGH);
     lastClimateMillis = currentTimeMillis;
@@ -371,15 +375,13 @@ void loop() {
     }
     float temp = bme.temperature;
     float press = bme.pressure / 100.0;
-    // empric measurements stated that we have to correct pressure by adding 16 hPa
-    press = press + 16.0;
     float hum = bme.humidity;
     float gas = bme.gas_resistance / 1000.0;
     float iaq = calculateIaq();
-  
-//    float alt = bme.readAltitude(SEALEVELPRESSURE_HPA);
 
-    Serial.println("BOSCH BME680");    
+    //    float alt = bme.readAltitude(SEALEVELPRESSURE_HPA);
+
+    Serial.println("BOSCH BME680");
     Serial.print("temp: ");
     Serial.print(temp);
     Serial.print(" hum: ");
@@ -392,18 +394,18 @@ void loop() {
     postDataClimate += hum_dht22;
     postDataClimate += "&press=";
     postDataClimate += press;
-    
+
     if (currentTimeMillis > gasCalibrationDelayMills)
     {
       postDataClimate += "&gas=";
       postDataClimate += gas;
       postDataClimate += "&iaq=";
-      postDataClimate += iaq;      
+      postDataClimate += iaq;
     }
 
     Serial.println("Making POST request for climate:");
     Serial.println(postDataClimate);
-   
+
     client.beginRequest();
     client.post(postDataClimate);
     client.sendHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -426,18 +428,19 @@ void loop() {
       // set interval to 60 seconds
       intervalClimateMillis = 60000;
     }
+    
     digitalWrite(LED_RED, LOW);
   }
-
+// LOOP finished
 }
 
-// LOOP finished.
+
 // Helper methods.
 
 void checkWifiConnection() {
 
   int wifiTrials = 0;
-  
+
   while (status != WL_CONNECTED) {
     digitalWrite(LED_RED, HIGH);
     wifiTrials++;
@@ -493,9 +496,7 @@ void beepWorkBegin() {
     digitalWrite(BUZZER_PIN, LOW);
     delay(2);
   }
-  
   delay(50);
-
   //HIGH sound
   for (int i = 0; i < 80; i++) { // make a sound
     digitalWrite(BUZZER_PIN, HIGH); // send high signal to buzzer
@@ -550,73 +551,73 @@ void beepWorkFinished() {
 float calculateIaq()
 {
 
-/*
- This software, the ideas and concepts is Copyright (c) David Bird 2018. All rights to this software are reserved.
- 
- Any redistribution or reproduction of any part or all of the contents in any form is prohibited other than the following:
- 1. You may print or download to a local hard disk extracts for your personal and non-commercial use only.
- 2. You may copy the content to individual third parties for their personal use, but only if you acknowledge the author David Bird as the source of the material.
- 3. You may not, except with my express written permission, distribute or commercially exploit the content.
- 4. You may not transmit it or store it in any other website or other form of electronic retrieval system for commercial purposes.
- The above copyright ('as annotated') notice and this permission notice shall be included in all copies or substantial portions of the Software and where the
- software use is visible to an end-user.
- 
- THE SOFTWARE IS PROVIDED "AS IS" FOR PRIVATE USE ONLY, IT IS NOT FOR COMMERCIAL USE IN WHOLE OR PART OR CONCEPT. FOR PERSONAL USE IT IS SUPPLIED WITHOUT WARRANTY 
- OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- See more at http://www.dsbird.org.uk
-*/  
-  
+  /*
+    This software, the ideas and concepts is Copyright (c) David Bird 2018. All rights to this software are reserved.
+
+    Any redistribution or reproduction of any part or all of the contents in any form is prohibited other than the following:
+    1. You may print or download to a local hard disk extracts for your personal and non-commercial use only.
+    2. You may copy the content to individual third parties for their personal use, but only if you acknowledge the author David Bird as the source of the material.
+    3. You may not, except with my express written permission, distribute or commercially exploit the content.
+    4. You may not transmit it or store it in any other website or other form of electronic retrieval system for commercial purposes.
+    The above copyright ('as annotated') notice and this permission notice shall be included in all copies or substantial portions of the Software and where the
+    software use is visible to an end-user.
+
+    THE SOFTWARE IS PROVIDED "AS IS" FOR PRIVATE USE ONLY, IT IS NOT FOR COMMERCIAL USE IN WHOLE OR PART OR CONCEPT. FOR PERSONAL USE IT IS SUPPLIED WITHOUT WARRANTY
+    OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    See more at http://www.dsbird.org.uk
+  */
+
   //Calculate humidity contribution to IAQ index
   float current_humidity = bme.readHumidity();
   if (current_humidity >= 38 && current_humidity <= 42)
-    hum_score = 0.25*100; // Humidity +/-5% around optimum 
+    hum_score = 0.25 * 100; // Humidity +/-5% around optimum
   else
   { //sub-optimal
-    if (current_humidity < 38) 
-      hum_score = 0.25/hum_reference*current_humidity*100;
+    if (current_humidity < 38)
+      hum_score = 0.25 / hum_reference * current_humidity * 100;
     else
     {
-      hum_score = ((-0.25/(100-hum_reference)*current_humidity)+0.416666)*100;
+      hum_score = ((-0.25 / (100 - hum_reference) * current_humidity) + 0.416666) * 100;
     }
   }
-  
+
   //Calculate gas contribution to IAQ index
   float gas_lower_limit = 5000;   // Bad air quality limit
-  float gas_upper_limit = 50000;  // Good air quality limit 
-  if (gas_reference > gas_upper_limit) gas_reference = gas_upper_limit; 
+  float gas_upper_limit = 50000;  // Good air quality limit
+  if (gas_reference > gas_upper_limit) gas_reference = gas_upper_limit;
   if (gas_reference < gas_lower_limit) gas_reference = gas_lower_limit;
-  gas_score = (0.75/(gas_upper_limit-gas_lower_limit)*gas_reference -(gas_lower_limit*(0.75/(gas_upper_limit-gas_lower_limit))))*100;
-  
+  gas_score = (0.75 / (gas_upper_limit - gas_lower_limit) * gas_reference - (gas_lower_limit * (0.75 / (gas_upper_limit - gas_lower_limit)))) * 100;
+
   //Combine results for the final IAQ index value (0-100% where 100% is good quality air)
   float air_quality_score = hum_score + gas_score;
 
-  Serial.println("Air Quality = "+String(air_quality_score,1)+"% derived from 25% of Humidity reading and 75% of Gas reading - 100% is good quality air");
-  Serial.println("Humidity element was : "+String(hum_score/100)+" of 0.25");
-  Serial.println("     Gas element was : "+String(gas_score/100)+" of 0.75");
+  Serial.println("Air Quality = " + String(air_quality_score, 1) + "% derived from 25% of Humidity reading and 75% of Gas reading - 100% is good quality air");
+  Serial.println("Humidity element was : " + String(hum_score / 100) + " of 0.25");
+  Serial.println("     Gas element was : " + String(gas_score / 100) + " of 0.75");
   if (bme.readGas() < 120000) Serial.println("***** Poor air quality *****");
   Serial.println();
-  if ((getgasreference_count++)%10==0) GetGasReference(); 
+  if ((getgasreference_count++) % 10 == 0) GetGasReference();
   Serial.println(CalculateIAQ(air_quality_score));
   Serial.println("------------------------------------------------");
-  float iaq = (100-air_quality_score)*5;
+  float iaq = (100 - air_quality_score) * 5;
   return iaq;
 }
 
-void GetGasReference(){
+void GetGasReference() {
   // Now run the sensor for a burn-in period, then use combination of relative humidity and gas resistance to estimate indoor air quality as a percentage.
   Serial.println("Getting a new gas reference value");
   int readings = 10;
-  for (int i = 1; i <= readings; i++){ // read gas for 10 x 0.150mS = 1.5secs
+  for (int i = 1; i <= readings; i++) { // read gas for 10 x 0.150mS = 1.5secs
     gas_reference += bme.readGas();
   }
   gas_reference = gas_reference / readings;
 }
 
-String CalculateIAQ(float score){
+String CalculateIAQ(float score) {
   String IAQ_text = "Air quality is ";
-  score = (100-score)*5;
+  score = (100 - score) * 5;
   if      (score >= 301)                  IAQ_text += "Hazardous";
   else if (score >= 201 && score <= 300 ) IAQ_text += "Very Unhealthy";
   else if (score >= 176 && score <= 200 ) IAQ_text += "Unhealthy";
@@ -624,4 +625,4 @@ String CalculateIAQ(float score){
   else if (score >=  51 && score <= 150 ) IAQ_text += "Moderate";
   else if (score >=  00 && score <=  50 ) IAQ_text += "Good";
   return IAQ_text;
-}  
+}
