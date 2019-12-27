@@ -11,7 +11,7 @@
 
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include "Adafruit_BME680.h"
+#include <Adafruit_BME680.h>
 
 /*
   SPI connection from RFID module to Arduino
@@ -69,15 +69,13 @@ float gas_reference = 250000;
 float hum_reference = 40;
 int   getgasreference_count = 0;
 
-// timer for request
-// initial values at startup
-
-// 30 secs  = 30000
-int intervalStockMillis = 30000;
-// 20 secs = 20000 ms
-int intervalClimateMillis = 20000;
-// 30 minutes = 1800000
-int gasCalibrationDelayMills = 1800000;
+// 15 minutes = 900000 ms
+unsigned long intervalClimateMillis = 900000;
+// 3 hours = 10800000‬
+unsigned long gasCalibrationDelayMills = 10800000;
+// 7 days = 604800000 ms
+// unsigned long intervalReboot = 604800000;
+unsigned long intervalReboot = 120000;
 
 unsigned long lastStockCheckMillis = 0;
 unsigned long lastClimateMillis = 0;
@@ -97,9 +95,6 @@ Servo myServo;
 // Init array that will store new NUID
 byte nuidPICC[4];
 
-// Software reset method
-void (*Reset_)(void) = 0;
-
 void setup() {
 
   // initialize multicolor LED
@@ -115,7 +110,7 @@ void setup() {
   //initialize servo and his port
   myServo.attach(3);
   delay(100);
-  myServo.write(90);
+  myServo.write(170);
 
   // initialize RFID module
   SPI.begin(); // Init SPI bus
@@ -144,13 +139,14 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
 
   // initialize BME680
-  while (!Serial);
+  // while (!Serial);
   Serial.println(F("BME680 test"));
 
   if (!bme.begin()) {
     Serial.println("Could not find a valid BME680 sensor, check wiring!");
     while (1);
   }
+  Serial.println(F("BME680 OK"));
 
   // Set up oversampling and filter initialization
   bme.setTemperatureOversampling(BME680_OS_8X);
@@ -165,13 +161,14 @@ void setup() {
   delay(2000);
   beep();
   digitalWrite(LED_GREEN, LOW);
+  Serial.println(F("Setup finished"));
 }
 
 void loop() {
 
   checkWifiConnection();
 
-  // Step 1 of 3.
+  // Step 1 of 2.
   // Check if new RFID card is present
 
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
@@ -273,88 +270,10 @@ void loop() {
     rfid.PCD_StopCrypto1();
   }
 
-  // Step 2 of 3.
-  // Request current stock value
-
   currentTimeMillis = millis();
 
-  if (currentTimeMillis - lastStockCheckMillis >= intervalStockMillis) {
-
-    digitalWrite(LED_RED, HIGH);
-
-    lastStockCheckMillis = currentTimeMillis;
-
-    String getData = "/officething/stock";
-
-    Serial.println("Making GET request for stock:");
-    Serial.println(getData);
-
-    client.beginRequest();
-    client.get(getData);
-    client.sendHeader("Content-Type", "application/x-www-form-urlencoded");
-    client.sendBasicAuth(clientuser, clientpassword);
-    client.endRequest();
-
-    // read the status code and body of the response
-    int statusCodeGet = client.responseStatusCode();
-    String responseGet = client.responseBody();
-
-    Serial.print("Status code stock: ");
-    Serial.println(statusCodeGet);
-    Serial.print("Response stock: ");
-    Serial.println(responseGet);
-    client.stop();
-
-    // default position, 12 o'clock position
-    int pos = 90;
-
-    // evaluate http request result
-    if (statusCodeGet == 200) {
-
-      const size_t capacity = JSON_OBJECT_SIZE(3); //root object has three elements
-      DynamicJsonDocument doc(capacity);
-      deserializeJson(doc, responseGet);
-  
-      float value = doc["stockValue"];
-      int val = value * 1000;
-  
-      //evalutate and map response stock value to printed range
-      if ((val > 0) & (val <= 10000)) {
-        if ((val > 0) && (val <= 2000)) {
-          pos = map(val, 0, 2000, 0, 18);
-        } else if ((val > 2000) && (val <= 4000)) {
-          pos = map(val, 2000, 4000, 18, 45);
-        } else if ((val > 4000) && (val <= 6000)) {
-          pos = map(val, 4000, 6000, 45, 81);
-        } else if ((val > 6000) && (val <= 8000)) {
-          pos = map(val, 6000, 8000, 81, 126);
-        } else if ((val > 8000) && (val <= 10000)) {
-          pos = map(val, 8000, 10000, 126, 180);
-        }
-  
-        Serial.print("servo position: ");
-        Serial.println(pos);
-  
-        //everything ok, set interval (back) to 1 hour
-        intervalStockMillis = 3600000;
-        myServo.write(180 - pos);
-      } 
-    }
-    // status code is not 200
-    else {
-      Serial.println("Stock value mapping error. Try again in 1 minute.");
-
-      //something went wrong requesting the value, try again in 1 minute
-      // set check interval to 60 sec
-      intervalStockMillis = 60000;
-    }
-
-    digitalWrite(LED_RED, LOW);
-  }
-
-  // Step 3 of 3
-  // Send current climate informations.
-
+  // Step 2 of 2
+  // Send or /and display current climate informations.
   if (currentTimeMillis - lastClimateMillis >= intervalClimateMillis)
   {
     digitalWrite(LED_RED, HIGH);
@@ -401,37 +320,54 @@ void loop() {
       postDataClimate += gas;
       postDataClimate += "&iaq=";
       postDataClimate += iaq;
+
+      int val = iaq * 100;
+      int pos;
+      //evalutate and map response iaq value to printed range
+      if ((val > 0) & (val <= 300000)) {
+        if ((val > 0) && (val <= 5000)) {
+          pos = map(val, 0, 5000, 18, 63);
+        }
+        else if ((val > 5000) && (val <= 15000)) {
+          pos = map(val, 5000, 15000, 63, 153);
+        }
+        else if ((val > 15000) && (val <= 18000)) {
+          pos = map(val, 15000, 18000, 153, 180);
+        }
+        else if (val > 18000) {
+          pos = 180;
+        }
+
+        Serial.print("iaq servo position: ");
+        Serial.println(pos);
+        myServo.write(180 - pos);
+      }
+
+      Serial.println("Making POST request for climate:");
+      Serial.println(postDataClimate);
+
+      client.beginRequest();
+      client.post(postDataClimate);
+      client.sendHeader("Content-Type", "application/x-www-form-urlencoded");
+      client.sendBasicAuth(clientuser, clientpassword);
+      client.endRequest();
+
+      // read servers response status code
+      int statusCodeClimate = client.responseStatusCode();
+
+      Serial.print("Servers response status code for climate POST: ");
+      Serial.println(statusCodeClimate);
+      client.stop();
+
+      if (statusCodeClimate != 201) {
+        Serial.println("Servers response status code for climate POST not 201. Try again in 1 minute.");
+      }
     }
 
-    Serial.println("Making POST request for climate:");
-    Serial.println(postDataClimate);
-
-    client.beginRequest();
-    client.post(postDataClimate);
-    client.sendHeader("Content-Type", "application/x-www-form-urlencoded");
-    client.sendBasicAuth(clientuser, clientpassword);
-    client.endRequest();
-
-    // read servers response status code
-    int statusCodeClimate = client.responseStatusCode();
-
-    Serial.print("Servers response status code for climate POST: ");
-    Serial.println(statusCodeClimate);
-    client.stop();
-
-    // rfid card accepted, workperiod finish
-    if (statusCodeClimate == 201) {
-      // set interval to 15 minutes
-      intervalClimateMillis = 900000;
-    } else {
-      Serial.println("Servers response status code for climate POST not 201. Try again in 1 minute.");
-      // set interval to 60 seconds
-      intervalClimateMillis = 60000;
-    }
-    
     digitalWrite(LED_RED, LOW);
   }
-// LOOP finished
+
+  // LOOP finished
 }
 
 
@@ -448,9 +384,8 @@ void checkWifiConnection() {
     Serial.println(ssid);
     // 60 trials x 10 seconds = 10 minutes
     if (wifiTrials > 60) {
-      Serial.print("Tried 10 minutes to connect to WIFI. Restart in 10 seconds!");
+      Serial.print("Tried 10 minutes to connect to WIFI");
       delay(10000);
-      Reset_();
     }
     status = WiFi.begin(ssid, pass);
 
