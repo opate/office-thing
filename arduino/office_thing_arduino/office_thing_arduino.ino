@@ -139,7 +139,6 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
 
   // initialize BME680
-  // while (!Serial);
   Serial.println(F("BME680 test"));
 
   if (!bme.begin()) {

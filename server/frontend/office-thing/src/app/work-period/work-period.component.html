@@ -30,7 +30,7 @@
     <ng-container matColumnDef="action">
       <th mat-header-cell *matHeaderCellDef> Action </th>
       <td mat-cell *matCellDef="let element"> 
-        <a (click)="openDialog('Update',element)" mat-button>Edit</a> 
+        <a (click)="openDialog('Edit',element)" mat-button>Edit</a> 
         <a (click)="openDialog('Delete',element)" mat-button>Delete</a>  
       </td>
     </ng-container>

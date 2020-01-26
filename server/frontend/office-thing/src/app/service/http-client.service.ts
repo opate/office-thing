@@ -23,4 +23,10 @@ export class HttpClientService {
     let url = '/workperiod';
     return this.httpClient.get<WorkPeriod[]>(url);
   }
+
+  deleteWorkPeriod(workPeriodId)
+  {
+    let url = "/workperiod/"+ workPeriodId;
+    return this.httpClient.delete(url, {responseType: 'text'});
+  }
 }

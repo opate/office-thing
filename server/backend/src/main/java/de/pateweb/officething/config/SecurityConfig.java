@@ -1,8 +1,12 @@
 package de.pateweb.officething.config;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,12 +55,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // attention. The previous .cors() and this method may be for develop reasons only
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+    	
+    	CorsConfiguration corsConfig = new CorsConfiguration();
+    	corsConfig.setAllowedHeaders(Collections.unmodifiableList(
+			Collections.singletonList("*")));
+    	corsConfig.setAllowedOrigins(Collections.unmodifiableList(
+			Collections.singletonList("*")));
+    	corsConfig.setAllowedMethods(Collections.unmodifiableList(
+			Arrays.asList(HttpMethod.GET.name(), 
+					HttpMethod.HEAD.name(), 
+					HttpMethod.POST.name(),
+					HttpMethod.OPTIONS.name(),
+					HttpMethod.PUT.name(),
+					HttpMethod.DELETE.name())));
+    	corsConfig.setMaxAge(1800L);
+    	
+    	
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-        source.registerCorsConfiguration("/ui/workinghours/*", new CorsConfiguration().applyPermitDefaultValues());
-//        source.registerCorsConfiguration("http://localhost:4200", new CorsConfiguration().applyPermitDefaultValues());
+        source.registerCorsConfiguration("/ui/workinghours/**", corsConfig);
         return source;         
     }  
+    
     
     
 	@Bean

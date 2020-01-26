@@ -18,11 +18,18 @@ export class WorkPeriodComponent implements OnInit {
     private httpClientService:HttpClientService,
     public dialog: MatDialog
   
-    ) { }
+    ) {
+      dialog.afterAllClosed
+      .subscribe(() => {
+      // update a variable or call a function when the dialog closes
+        this.getData();
+      }
+    );
+
+     }
 
   ngOnInit() {
-    this.httpClientService.getWorkPeriods().subscribe(response =>this.handleSuccessfulResponse(response),
-     ); 
+      this.getData(); 
   }
 
   handleSuccessfulResponse(response)
@@ -41,4 +48,10 @@ export class WorkPeriodComponent implements OnInit {
     });
  
   } 
+
+  getData()
+  {
+    this.httpClientService.getWorkPeriods().subscribe(response =>this.handleSuccessfulResponse(response),
+    );
+  }
 }

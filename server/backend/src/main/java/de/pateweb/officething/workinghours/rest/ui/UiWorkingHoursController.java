@@ -16,7 +16,9 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,6 +38,7 @@ public class UiWorkingHoursController {
 	private static final Logger LOG = LoggerFactory.getLogger(UiWorkingHoursController.class);
 
 	private final String UNAUTHORIZED = "Unauthorized";
+	private final String DELETED = "Delted";
 
 	private String timeZoneId;
 
@@ -50,6 +53,34 @@ public class UiWorkingHoursController {
 	@Autowired
 	WorkPeriodRepository workPeriodRepository;
 
+	@DeleteMapping("/workperiod/{workPeriodIdToDelete}")
+	public ResponseEntity<?> deleteWorkPeriod(@PathVariable("workPeriodIdToDelete") Long idToDelete)
+	{
+		LOG.debug("ui.deleteWorkPeriod()");
+		
+		String currentUserEmail = "";
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			currentUserEmail = authentication.getName();
+			LOG.info("user: {}", currentUserEmail);
+		} else {
+			return new ResponseEntity<>(UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+		}
+
+		if (!currentUserEmail.isEmpty()) {
+			
+			WorkPeriod wpToDelete = workPeriodRepository.findById(idToDelete).get();
+			
+			workPeriodRepository.delete(wpToDelete);
+			return new ResponseEntity<>(DELETED, HttpStatus.ACCEPTED);
+			
+		} else {
+			return new ResponseEntity<>(UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+		}
+	}
+	
 	@GetMapping("/workperiod")
 	public ResponseEntity<?> getWorkPeriodPerUser() {
 
@@ -143,6 +174,7 @@ public class UiWorkingHoursController {
 				}
 
 				UiWorkPeriod newWebDTO = new UiWorkPeriod();
+				newWebDTO.setId(e.getId());
 				newWebDTO.setWorkDuration(duration);
 				newWebDTO.setWorkFinish(finish);
 				newWebDTO.setWorkStart(ZonedDateTime.ofInstant(e.getWorkStart(), ZoneId.of(timeZoneId)));
