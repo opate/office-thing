@@ -12,6 +12,7 @@ export class LoginComponent implements OnInit {
   username = ''
   password = ''
   invalidLogin = false
+  invalidLoginMessage = ''
 
   constructor(private router: Router,
     private loginservice: AuthenticationService) { }
@@ -23,13 +24,13 @@ export class LoginComponent implements OnInit {
     (this.loginservice.authenticate(this.username, this.password).subscribe(
       data => {
         this.router.navigate(['workperiod'])
-        this.invalidLogin = false
       },
       error => {
         this.invalidLogin = true
-
+        this.invalidLoginMessage = 'Login failed. Wrong credentials?'
       }
     )
+
     );
 
   }

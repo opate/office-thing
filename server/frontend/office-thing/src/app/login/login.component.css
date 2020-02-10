@@ -1,9 +1,9 @@
-.example-form {
+.my-form {
     min-width: 200px;
     width: 50%;
     padding: 2em; margin: auto; text-align: center
   }
   
-  .example-full-width {
+  .my-full-width {
     width: 50%;
   }

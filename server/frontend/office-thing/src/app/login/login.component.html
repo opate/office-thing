@@ -1,5 +1,5 @@
 <mat-card style="margin-top: 20px">
-  <form class="example-form">
+  <form class="my-form">
 
     <mat-card-content>
       <mat-form-field>
@@ -15,10 +15,14 @@
     </mat-card-content>
 
     <div>
-      <button (click)=checkLogin() mat-raised-button>
+      <button (click)=checkLogin() data-target="#publisherVerification" mat-raised-button>
         Login
       </button>
     </div>
+
+    <div id="publisherVerification" ng-if="invalidLogin === true">
+        <p>{{invalidLoginMessage}}</p>
+   </div>
 
   </form>
 

@@ -1,4 +1,5 @@
 <header>
+        <div [style.background]="'url(../../assets/img/arbeitszeiterfassung.jpg)'"></div>
         <mat-toolbar>
 
                 <mat-toolbar-row>
@@ -16,8 +17,6 @@
                     <a *ngIf="loginService.isUserLoggedIn()" mat-button [routerLink]="'/logout'"> Logout </a>
               
                 </mat-toolbar-row>
-              
-                
 
         </mat-toolbar>
         
