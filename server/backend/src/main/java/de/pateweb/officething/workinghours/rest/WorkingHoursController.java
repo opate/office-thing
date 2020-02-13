@@ -166,6 +166,12 @@ public class WorkingHoursController {
 				newWorkPeriod.setWorkStart(newEventForUser.getEventTime());
 
 				workPeriodRepository.save(newWorkPeriod);
+				
+				StartedWorkPeriod newStartedWorkPeriod = new StartedWorkPeriod();
+				newStartedWorkPeriod.setUser(eventUser);
+				newStartedWorkPeriod.setWorkPeriod(newWorkPeriod);
+				
+				startedWorkPeriodRespository.save(newStartedWorkPeriod);
 
 				RfidTagInUse newTagInUse = new RfidTagInUse();
 				newTagInUse.setRfidUid(rfidUid);
