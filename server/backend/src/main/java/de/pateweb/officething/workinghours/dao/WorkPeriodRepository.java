@@ -17,7 +17,5 @@ public interface WorkPeriodRepository extends CrudRepository<WorkPeriod, Long> {
 
 	Optional<WorkPeriod> findTopByOrderByIdDesc();
 	
-	Optional<WorkPeriod> findTopByRfidUidInOrderByIdDesc(Long rfidUid);
-	
-	List<WorkPeriod> findAllByRfidUidInOrderByWorkDateDesc(Long rfidUid);
+	List<WorkPeriod> findAllByUserIdInOrderByWorkDateDesc(Long userId);
 }

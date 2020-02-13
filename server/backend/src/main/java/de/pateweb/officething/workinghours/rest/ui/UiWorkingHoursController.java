@@ -27,6 +27,7 @@ import de.pateweb.officething.workinghours.dao.WorkPeriodRepository;
 import de.pateweb.officething.workinghours.model.User;
 import de.pateweb.officething.workinghours.model.WorkPeriod;
 import de.pateweb.officething.workinghours.rest.ui.dto.UiUser;
+import de.pateweb.officething.workinghours.rest.ui.dto.UiWorkEvent;
 import de.pateweb.officething.workinghours.rest.ui.dto.UiWorkPeriod;
 
 //@CrossOrigin(origins = "*")
@@ -157,10 +158,10 @@ public class UiWorkingHoursController {
 		if (userCandidate.isPresent()) {
 			User user = userCandidate.get();
 			List<WorkPeriod> findAllByRfidUidInOrderByWorkDateDesc = workPeriodRepository
-					.findAllByRfidUidInOrderByWorkDateDesc(user.getCurrentRfidTag().getRfidUid());
+					.findAllByUserIdInOrderByWorkDateDesc(user.getId());
 
-			for (WorkPeriod e : findAllByRfidUidInOrderByWorkDateDesc) {
-				Long totalSecs = e.getWorkDurationSeconds();
+			for (WorkPeriod workPeriod : findAllByRfidUidInOrderByWorkDateDesc) {
+				Long totalSecs = workPeriod.getWorkDurationSeconds();
 
 				duration = "";
 				finish = null;
@@ -170,15 +171,26 @@ public class UiWorkingHoursController {
 					minutes = (totalSecs % 3600) / 60;
 					seconds = totalSecs % 60;
 					duration = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-					finish = ZonedDateTime.ofInstant(e.getWorkFinish(), ZoneId.of(timeZoneId));
+					finish = ZonedDateTime.ofInstant(workPeriod.getFinishWorkEvent().getEventTime(), ZoneId.of(timeZoneId));
 				}
+				
+				UiWorkEvent startWorkEvent = new UiWorkEvent();
+				startWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getStartWorkEvent().getEventTime(), ZoneId.of(timeZoneId)));
+				startWorkEvent.setClientInfo(workPeriod.getStartWorkEvent().getClientInfo());
+				// TODO
+				//startWorkEvent.setRfidTag(rfidTag);
 
+				UiWorkEvent finishWorkEvent = new UiWorkEvent();
+				finishWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getFinishWorkEvent().getEventTime(), ZoneId.of(timeZoneId)));
+				finishWorkEvent.setClientInfo(workPeriod.getFinishWorkEvent().getClientInfo());
+				// TODO
+				//finishWorkEvent.setRfidTag(rfidTag);
+				
 				UiWorkPeriod newWebDTO = new UiWorkPeriod();
-				newWebDTO.setId(e.getId());
+				newWebDTO.setId(workPeriod.getId());
 				newWebDTO.setWorkDuration(duration);
-				newWebDTO.setWorkFinish(finish);
-				newWebDTO.setWorkStart(ZonedDateTime.ofInstant(e.getWorkStart(), ZoneId.of(timeZoneId)));
-				newWebDTO.setRfidUid(e.getRfidUid());
+				newWebDTO.setStartWorkEvent(startWorkEvent);
+				newWebDTO.setFinishWorkEvent(finishWorkEvent);
 				returnList.add(newWebDTO);
 			}
 		}

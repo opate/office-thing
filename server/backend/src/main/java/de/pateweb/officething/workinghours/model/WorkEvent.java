@@ -31,11 +31,15 @@ public class WorkEvent implements Serializable{
     private long id;
 
 	@OneToOne
-	@JoinColumn(name="rfid_tag_id")
-    private RfidTag rfidTag;
+	@JoinColumn(name="user_id")
+    private User user;
 	
     @Basic
     private Instant eventTime;
+    
+	@OneToOne
+	@JoinColumn(name="rfid_tag_id")    
+    private RfidTag rfidTag;
 
     private String clientInfo;
 }

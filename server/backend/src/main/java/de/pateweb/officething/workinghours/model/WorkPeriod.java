@@ -34,21 +34,15 @@ public class WorkPeriod implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private Long rfidUid;
+    private User user;
 
     @Basic
     private Instant workDate;
-
-    @Basic
-    private Instant workStart;
-    
-    @Basic
-    private Instant workFinish;
     
     private Long workDurationSeconds;    
     
-    private Long startEventId;
+    private WorkEvent startWorkEvent;
     
-    private Long finishEventId;
+    private WorkEvent finishWorkEvent;
 
 }

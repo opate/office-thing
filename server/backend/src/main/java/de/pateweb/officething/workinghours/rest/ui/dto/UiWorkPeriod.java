@@ -1,9 +1,5 @@
 package de.pateweb.officething.workinghours.rest.ui.dto;
 
-import java.time.ZonedDateTime;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -15,14 +11,10 @@ public class UiWorkPeriod {
 
     private Long id;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime workStart;
+    private UiWorkEvent startWorkEvent;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-	private ZonedDateTime workFinish;
+    private UiWorkEvent finishWorkEvent;
 	
 	private String workDuration;
-	
-	private Long rfidUid;
 	
 }

@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS startedworkperiod
 );
 
 -- Remove workevent constraints
-ALTER TABLE workevent DROP CONSTRAINT IF EXISTS workevent_rfid_tag_id_fkey;
 ALTER TABLE workevent ALTER COLUMN rfid_tag_id DROP NOT NULL;
 ALTER TABLE workperiod ALTER COLUMN rfid_uid DROP NOT NULL;
 

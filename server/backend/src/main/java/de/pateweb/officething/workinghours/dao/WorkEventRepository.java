@@ -14,5 +14,4 @@ public interface WorkEventRepository extends CrudRepository<WorkEvent, Long> {
 
 	WorkEvent findTopByOrderByIdDesc();
 		
-	WorkEvent findByRfidTagRfidUid(Long rfidUid);
 }

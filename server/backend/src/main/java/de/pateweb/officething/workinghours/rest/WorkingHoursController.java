@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.pateweb.officething.workinghours.UserRole;
 import de.pateweb.officething.workinghours.dao.CustomerRepository;
-import de.pateweb.officething.workinghours.dao.RfidTagInUseRepository;
+import de.pateweb.officething.workinghours.dao.StartedWorkPeriodRepository;
 import de.pateweb.officething.workinghours.dao.RfidTagRepository;
 import de.pateweb.officething.workinghours.dao.UserRepository;
 import de.pateweb.officething.workinghours.dao.WorkEventRepository;
 import de.pateweb.officething.workinghours.dao.WorkPeriodRepository;
 import de.pateweb.officething.workinghours.model.Customer;
 import de.pateweb.officething.workinghours.model.RfidTag;
-import de.pateweb.officething.workinghours.model.RfidTagInUse;
+import de.pateweb.officething.workinghours.model.StartedWorkPeriod;
 import de.pateweb.officething.workinghours.model.User;
 import de.pateweb.officething.workinghours.model.WorkEvent;
 import de.pateweb.officething.workinghours.model.WorkPeriod;
@@ -73,7 +73,7 @@ public class WorkingHoursController {
 	PasswordEncoder passwordEncoder;
 
 	@Autowired
-	RfidTagInUseRepository rfidTagInUseRespository;
+	StartedWorkPeriodRepository startedWorkPeriodRespository;
 
 	/**
 	 * 
@@ -86,8 +86,10 @@ public class WorkingHoursController {
 	
 	//addNewWorkingHoursEvent(@RequestParam("rfid_uid") String rfidUid)
 	@PostMapping("/workevent")
-	public ResponseEntity<?> newWorkEvent(@RequestParam("rfid_uid") String rfidUidHex,
-			@RequestParam(name="event_time", required = false) String eventTimeUtc, @RequestParam(name="client", required=false) String client) {
+	public ResponseEntity<?> newWorkEventByRfid(@RequestParam("rfid_uid") String rfidUidHex,
+											@RequestParam(name="event_time", required = false) String eventTimeUtc, 
+											@RequestParam(name="client", required=false) String client) 
+	{
 
 		LOG.info("newWorkEvent() for rfid {}", rfidUidHex);
 
@@ -96,12 +98,15 @@ public class WorkingHoursController {
 		{
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
 			eventTimeUtc = ZonedDateTime.now().format(formatter);
+			if (client == null)
+			{
+				client = "unknown_client_current_timestamp";
+			} else
+			{
+				client = "unknown_client_with_timestamp";
+			}
 		}
 		
-		if (client == null)
-		{
-			client = "unknown";
-		}
 		
 		Long rfidUid = Long.parseLong(rfidUidHex.replaceAll(":", ""), 16);
 
@@ -128,42 +133,42 @@ public class WorkingHoursController {
 			Instant currentEventTime = Instant.parse(eventTimeUtc);
 
 			WorkEvent newEventForUser = new WorkEvent();
-			newEventForUser.setClientInfo(client);
+			newEventForUser.setClientInfo(client+rfidUidHex);
 			newEventForUser.setEventTime(currentEventTime);
+			newEventForUser.setUser(eventUser);
 			newEventForUser.setRfidTag(rfidTag);
 
 			eventRepository.save(newEventForUser);
 
-			Optional<RfidTagInUse> tagInUseCandidate = rfidTagInUseRespository.findByRfidUid(rfidUid);
+			Optional<StartedWorkPeriod> startedWorkPeriodCandidate = startedWorkPeriodRespository.findByUserId(eventUser.getId());
 
-			if (tagInUseCandidate.isPresent()) {
+			if (startedWorkPeriodCandidate.isPresent()) {
 
-				RfidTagInUse rfidTagInUse = tagInUseCandidate.get();
+				StartedWorkPeriod startedWorkPeriod = startedWorkPeriodCandidate.get();
 				
-				WorkPeriod workPeriod = workPeriodRepository.findById(rfidTagInUse.getWorkPeriodId()).get();
+				WorkPeriod workPeriod = startedWorkPeriod.getWorkPeriod();
 
-				workPeriod.setWorkFinish(currentEventTime);
-				workPeriod.setFinishEventId(newEventForUser.getId());
+				workPeriod.setFinishWorkEvent(newEventForUser);
 
-				Long durationSeconds = Duration.between(workPeriod.getWorkStart(), workPeriod.getWorkFinish())
+				Long durationSeconds = Duration.between(workPeriod.getStartWorkEvent().getEventTime(), workPeriod.getFinishWorkEvent().getEventTime())
 						.toSeconds();
 				workPeriod.setWorkDurationSeconds(durationSeconds);
 				workPeriodRepository.save(workPeriod);
 
-				rfidTagInUseRespository.deleteById(tagInUseCandidate.get().getId());
+				startedWorkPeriodRespository.delete(startedWorkPeriod);
 
 				String info = "End of WorkPeriod detected";
 				LOG.info(info);
 				
 				return new ResponseEntity<>(info, HttpStatus.OK);
 			}
-			// tag is not in use so create new workperiod
+			// no startedworkperiod found so create new workperiod
 			else {
+				
 				WorkPeriod newWorkPeriod = new WorkPeriod();
-				newWorkPeriod.setRfidUid(rfidUid);
-				newWorkPeriod.setStartEventId(newEventForUser.getId());
 				newWorkPeriod.setWorkDate(newEventForUser.getEventTime());
-				newWorkPeriod.setWorkStart(newEventForUser.getEventTime());
+				newWorkPeriod.setStartWorkEvent(newEventForUser);
+				newWorkPeriod.setUser(eventUser);
 
 				workPeriodRepository.save(newWorkPeriod);
 				
@@ -172,12 +177,6 @@ public class WorkingHoursController {
 				newStartedWorkPeriod.setWorkPeriod(newWorkPeriod);
 				
 				startedWorkPeriodRespository.save(newStartedWorkPeriod);
-
-				RfidTagInUse newTagInUse = new RfidTagInUse();
-				newTagInUse.setRfidUid(rfidUid);
-				newTagInUse.setWorkPeriodId(newWorkPeriod.getId());
-
-				rfidTagInUseRespository.save(newTagInUse);
 
 				String info = "Begin of WorkPeriod detected";
 				LOG.info(info);
@@ -221,23 +220,22 @@ public class WorkingHoursController {
 				WorkEvent newEvent = new WorkEvent();
 				newEvent.setClientInfo(client);
 				newEvent.setEventTime(Instant.parse(eventTimeUtc));
-				newEvent.setRfidTag(newRfidTag);
+				newEvent.setUser(newUser);
 
 				eventRepository.save(newEvent);
 
 				WorkPeriod newWorkPeriod = new WorkPeriod();
-				newWorkPeriod.setRfidUid(rfidUid);
-				newWorkPeriod.setStartEventId(newEvent.getId());
+				newWorkPeriod.setUser(newUser);
+				newWorkPeriod.setStartWorkEvent(newEvent);
 				newWorkPeriod.setWorkDate(newEvent.getEventTime());
-				newWorkPeriod.setWorkStart(newEvent.getEventTime());
 
 				workPeriodRepository.save(newWorkPeriod);
 
-				RfidTagInUse newTagInUse = new RfidTagInUse();
-				newTagInUse.setRfidUid(rfidUid);
-				newTagInUse.setWorkPeriodId(newWorkPeriod.getId());
+				StartedWorkPeriod newStartedWorkPeriod = new StartedWorkPeriod();
+				newStartedWorkPeriod.setUser(newUser);
+				newStartedWorkPeriod.setWorkPeriod(newWorkPeriod);
 
-				rfidTagInUseRespository.save(newTagInUse);
+				startedWorkPeriodRespository.save(newStartedWorkPeriod);
 
 				String info = "This RFID tag is unknown, so new user has been created. WorkPeriod begin saved.";
 				
