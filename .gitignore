@@ -49,3 +49,5 @@ server/backend/officething.log.2019-10-13.0.gz
 server/backend/officething.log.2019-10-14.0.gz
 server/frontend/office-thing-vs-workspace.code-workspace
 *.gz
+*.elf
+~$zeigevorlage-IAQ-worded-with-calib.docx

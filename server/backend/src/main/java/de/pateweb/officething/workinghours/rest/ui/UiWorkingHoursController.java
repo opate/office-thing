@@ -41,7 +41,7 @@ public class UiWorkingHoursController {
 	private static final Logger LOG = LoggerFactory.getLogger(UiWorkingHoursController.class);
 
 	private final String UNAUTHORIZED = "Unauthorized";
-	private final String DELETED = "Delted";
+	private final String DELETED = "Deleted";
 
 	private String timeZoneId;
 
@@ -78,17 +78,22 @@ public class UiWorkingHoursController {
 		if (!currentUserEmail.isEmpty()) {
 			
 			WorkPeriod wpToDelete = workPeriodRepository.findById(idToDelete).get();
-			
+
 			WorkEvent startEventToDelete = wpToDelete.getWorkStartEvent();
-			workEventRepository.delete(startEventToDelete);
-			
+			WorkEvent finishEventToDelete = null;
 			if (wpToDelete.getWorkFinishEvent() != null)
 			{
-				WorkEvent finishEventToDeleta = wpToDelete.getWorkFinishEvent();
-				workEventRepository.delete(finishEventToDeleta);
+				finishEventToDelete = wpToDelete.getWorkFinishEvent();
 			}
 			
 			workPeriodRepository.delete(wpToDelete);
+
+			workEventRepository.delete(startEventToDelete);
+			if (finishEventToDelete != null)
+			{
+				workEventRepository.delete(finishEventToDelete);
+			}
+			
 			
 			return new ResponseEntity<>(DELETED, HttpStatus.ACCEPTED);
 			
@@ -192,12 +197,14 @@ public class UiWorkingHoursController {
 				UiWorkEvent startWorkEvent = new UiWorkEvent();
 				startWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getWorkStartEvent().getEventTime(), ZoneId.of(timeZoneId)));
 				startWorkEvent.setClientInfo(workPeriod.getWorkStartEvent().getClientInfo());
+				startWorkEvent.setId(workPeriod.getWorkStartEvent().getId());
 				if (workPeriod.getWorkStartEvent().getRfidTag() != null)
 					startWorkEvent.setRfidTag(workPeriod.getWorkStartEvent().getRfidTag().getRfidUidHex());
 
 				UiWorkEvent finishWorkEvent = new UiWorkEvent();
 				finishWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getWorkFinishEvent().getEventTime(), ZoneId.of(timeZoneId)));
 				finishWorkEvent.setClientInfo(workPeriod.getWorkFinishEvent().getClientInfo());
+				finishWorkEvent.setId(workPeriod.getWorkFinishEvent().getId());
 				if (workPeriod.getWorkFinishEvent().getRfidTag() != null)
 					finishWorkEvent.setRfidTag(workPeriod.getWorkFinishEvent().getRfidTag().getRfidUidHex());;
 				

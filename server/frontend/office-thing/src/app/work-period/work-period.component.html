@@ -1,25 +1,20 @@
 <div class="mat-elevation-z8">
 
-  <table style="width: 75%" mat-table [dataSource]="workperiods">
+  <table style="width: 75%" mat-table [dataSource]="uiworkperiods">
 
-    <ng-container matColumnDef="rfid">
-      <th mat-header-cell *matHeaderCellDef> RFID </th>
-      <td mat-cell *matCellDef="let element"> {{element.rfidUid}} </td>
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef> ID </th>
+      <td mat-cell *matCellDef="let element"> {{element.id}} </td>
     </ng-container>
 
-    <ng-container matColumnDef="workDate">
-      <th mat-header-cell *matHeaderCellDef> Date </th>
-      <td mat-cell *matCellDef="let element"> {{element.workStart | date:'EEEE, d.M.yyyy' }} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="workStart">
+    <ng-container matColumnDef="startWorkEvent">
       <th mat-header-cell *matHeaderCellDef> Start </th>
-      <td mat-cell *matCellDef="let element"> {{element.workStart | date:'H:mm' }} </td>
+      <td mat-cell *matCellDef="let element"> {{element.startWorkEvent.eventTime | date:'d.M.yyyy - H:mm' }} </td>
     </ng-container>
 
-    <ng-container matColumnDef="workFinish">
+    <ng-container matColumnDef="finishWorkEvent">
       <th mat-header-cell *matHeaderCellDef> Finish </th>
-      <td mat-cell *matCellDef="let element"> {{element.workFinish | date:'H:mm (d.M.yyyy)' }} </td>
+      <td mat-cell *matCellDef="let element"> {{element.finishWorkEvent.eventTime | date:'H:mm' }} </td>
     </ng-container>
 
     <ng-container matColumnDef="workDuration">

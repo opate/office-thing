@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClientService, WorkPeriod } from '../service/http-client.service';
+import { HttpClientService, UiWorkPeriod } from '../service/http-client.service';
 import { DialogBoxComponent } from '../dialog-box/dialog-box.component';
 import { MatDialog } from '@angular/material';
 
@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material';
 
 export class WorkPeriodComponent implements OnInit {
 
-  workperiods:WorkPeriod[];
+  uiworkperiods:UiWorkPeriod[];
 
   constructor(
 
@@ -34,10 +34,10 @@ export class WorkPeriodComponent implements OnInit {
 
   handleSuccessfulResponse(response)
   {
-      this.workperiods=response;
+      this.uiworkperiods=response;
   }
 
-  displayedColumns: string[] = ['rfid', 'workDate', 'workStart', 'workFinish', 'workDuration', 'action'];
+  displayedColumns: string[] = ['id', 'startWorkEvent', 'finishWorkEvent', 'workDuration', 'action'];
   
 
   openDialog(action,obj) {

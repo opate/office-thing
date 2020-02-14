@@ -12,6 +12,8 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @Data
 public class UiWorkEvent {
+	
+	private Long id;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private ZonedDateTime eventTime;

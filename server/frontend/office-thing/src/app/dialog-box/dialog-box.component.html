@@ -1,10 +1,10 @@
 <h1 mat-dialog-title><strong>{{action}}</strong></h1>
 <div mat-dialog-content>
   <mat-form-field *ngIf="action != 'Delete'; else elseTemplate">
-    <input placeholder="{{action}} workperiod" matInput [(ngModel)]="local_data.workStart">
+    <input placeholder="{{action}} workperiod" matInput [(ngModel)]="local_data.startWorkEvent.eventTime">
   </mat-form-field>
   <ng-template #elseTemplate>
-    Sure to delete <b>{{local_data.workStart}}</b>?
+    Sure to delete <b>{{local_data.startWorkEvent.eventTime}}</b>?
   </ng-template>
 </div>
 <div mat-dialog-actions>
