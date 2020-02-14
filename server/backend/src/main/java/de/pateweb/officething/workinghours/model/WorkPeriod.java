@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -34,15 +35,24 @@ public class WorkPeriod implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+	@OneToOne
+	@JoinColumn(name="user_id")	
     private User user;
 
     @Basic
-    private Instant workDate;
+    private Instant workStart;
+    
+    @Basic
+    private Instant workFinish;
     
     private Long workDurationSeconds;    
     
-    private WorkEvent startWorkEvent;
+	@OneToOne
+	@JoinColumn(name="start_event_id")    
+    private WorkEvent workStartEvent;
     
-    private WorkEvent finishWorkEvent;
+	@OneToOne
+	@JoinColumn(name="finish_event_id")    
+    private WorkEvent workFinishEvent;
 
 }

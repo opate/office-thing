@@ -17,5 +17,5 @@ public interface WorkPeriodRepository extends CrudRepository<WorkPeriod, Long> {
 
 	Optional<WorkPeriod> findTopByOrderByIdDesc();
 	
-	List<WorkPeriod> findAllByUserIdInOrderByWorkDateDesc(Long userId);
+	List<WorkPeriod> findAllByUserIdInOrderByWorkStartDesc(Long userId);
 }

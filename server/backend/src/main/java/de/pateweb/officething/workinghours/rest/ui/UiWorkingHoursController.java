@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.pateweb.officething.workinghours.dao.UserRepository;
+import de.pateweb.officething.workinghours.dao.WorkEventRepository;
 import de.pateweb.officething.workinghours.dao.WorkPeriodRepository;
 import de.pateweb.officething.workinghours.model.User;
+import de.pateweb.officething.workinghours.model.WorkEvent;
 import de.pateweb.officething.workinghours.model.WorkPeriod;
 import de.pateweb.officething.workinghours.rest.ui.dto.UiUser;
 import de.pateweb.officething.workinghours.rest.ui.dto.UiWorkEvent;
@@ -53,6 +55,9 @@ public class UiWorkingHoursController {
 
 	@Autowired
 	WorkPeriodRepository workPeriodRepository;
+	
+	@Autowired
+	WorkEventRepository workEventRepository;
 
 	@DeleteMapping("/workperiod/{workPeriodIdToDelete}")
 	public ResponseEntity<?> deleteWorkPeriod(@PathVariable("workPeriodIdToDelete") Long idToDelete)
@@ -74,7 +79,17 @@ public class UiWorkingHoursController {
 			
 			WorkPeriod wpToDelete = workPeriodRepository.findById(idToDelete).get();
 			
+			WorkEvent startEventToDelete = wpToDelete.getWorkStartEvent();
+			workEventRepository.delete(startEventToDelete);
+			
+			if (wpToDelete.getWorkFinishEvent() != null)
+			{
+				WorkEvent finishEventToDeleta = wpToDelete.getWorkFinishEvent();
+				workEventRepository.delete(finishEventToDeleta);
+			}
+			
 			workPeriodRepository.delete(wpToDelete);
+			
 			return new ResponseEntity<>(DELETED, HttpStatus.ACCEPTED);
 			
 		} else {
@@ -158,7 +173,7 @@ public class UiWorkingHoursController {
 		if (userCandidate.isPresent()) {
 			User user = userCandidate.get();
 			List<WorkPeriod> findAllByRfidUidInOrderByWorkDateDesc = workPeriodRepository
-					.findAllByUserIdInOrderByWorkDateDesc(user.getId());
+					.findAllByUserIdInOrderByWorkStartDesc(user.getId());
 
 			for (WorkPeriod workPeriod : findAllByRfidUidInOrderByWorkDateDesc) {
 				Long totalSecs = workPeriod.getWorkDurationSeconds();
@@ -171,27 +186,27 @@ public class UiWorkingHoursController {
 					minutes = (totalSecs % 3600) / 60;
 					seconds = totalSecs % 60;
 					duration = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-					finish = ZonedDateTime.ofInstant(workPeriod.getFinishWorkEvent().getEventTime(), ZoneId.of(timeZoneId));
+					finish = ZonedDateTime.ofInstant(workPeriod.getWorkFinishEvent().getEventTime(), ZoneId.of(timeZoneId));
 				}
 				
 				UiWorkEvent startWorkEvent = new UiWorkEvent();
-				startWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getStartWorkEvent().getEventTime(), ZoneId.of(timeZoneId)));
-				startWorkEvent.setClientInfo(workPeriod.getStartWorkEvent().getClientInfo());
-				// TODO
-				//startWorkEvent.setRfidTag(rfidTag);
+				startWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getWorkStartEvent().getEventTime(), ZoneId.of(timeZoneId)));
+				startWorkEvent.setClientInfo(workPeriod.getWorkStartEvent().getClientInfo());
+				if (workPeriod.getWorkStartEvent().getRfidTag() != null)
+					startWorkEvent.setRfidTag(workPeriod.getWorkStartEvent().getRfidTag().getRfidUidHex());
 
 				UiWorkEvent finishWorkEvent = new UiWorkEvent();
-				finishWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getFinishWorkEvent().getEventTime(), ZoneId.of(timeZoneId)));
-				finishWorkEvent.setClientInfo(workPeriod.getFinishWorkEvent().getClientInfo());
-				// TODO
-				//finishWorkEvent.setRfidTag(rfidTag);
+				finishWorkEvent.setEventTime(ZonedDateTime.ofInstant(workPeriod.getWorkFinishEvent().getEventTime(), ZoneId.of(timeZoneId)));
+				finishWorkEvent.setClientInfo(workPeriod.getWorkFinishEvent().getClientInfo());
+				if (workPeriod.getWorkFinishEvent().getRfidTag() != null)
+					finishWorkEvent.setRfidTag(workPeriod.getWorkFinishEvent().getRfidTag().getRfidUidHex());;
 				
-				UiWorkPeriod newWebDTO = new UiWorkPeriod();
-				newWebDTO.setId(workPeriod.getId());
-				newWebDTO.setWorkDuration(duration);
-				newWebDTO.setStartWorkEvent(startWorkEvent);
-				newWebDTO.setFinishWorkEvent(finishWorkEvent);
-				returnList.add(newWebDTO);
+				UiWorkPeriod newWebWorkPeriodDTO = new UiWorkPeriod();
+				newWebWorkPeriodDTO.setId(workPeriod.getId());
+				newWebWorkPeriodDTO.setWorkDuration(duration);
+				newWebWorkPeriodDTO.setStartWorkEvent(startWorkEvent);
+				newWebWorkPeriodDTO.setFinishWorkEvent(finishWorkEvent);
+				returnList.add(newWebWorkPeriodDTO);
 			}
 		}
 

@@ -148,9 +148,10 @@ public class WorkingHoursController {
 				
 				WorkPeriod workPeriod = startedWorkPeriod.getWorkPeriod();
 
-				workPeriod.setFinishWorkEvent(newEventForUser);
+				workPeriod.setWorkFinishEvent(newEventForUser);
+				workPeriod.setWorkFinish(newEventForUser.getEventTime());
 
-				Long durationSeconds = Duration.between(workPeriod.getStartWorkEvent().getEventTime(), workPeriod.getFinishWorkEvent().getEventTime())
+				Long durationSeconds = Duration.between(workPeriod.getWorkStartEvent().getEventTime(), workPeriod.getWorkFinishEvent().getEventTime())
 						.toSeconds();
 				workPeriod.setWorkDurationSeconds(durationSeconds);
 				workPeriodRepository.save(workPeriod);
@@ -166,8 +167,8 @@ public class WorkingHoursController {
 			else {
 				
 				WorkPeriod newWorkPeriod = new WorkPeriod();
-				newWorkPeriod.setWorkDate(newEventForUser.getEventTime());
-				newWorkPeriod.setStartWorkEvent(newEventForUser);
+				newWorkPeriod.setWorkStart(newEventForUser.getEventTime());
+				newWorkPeriod.setWorkStartEvent(newEventForUser);
 				newWorkPeriod.setUser(eventUser);
 
 				workPeriodRepository.save(newWorkPeriod);
@@ -226,8 +227,8 @@ public class WorkingHoursController {
 
 				WorkPeriod newWorkPeriod = new WorkPeriod();
 				newWorkPeriod.setUser(newUser);
-				newWorkPeriod.setStartWorkEvent(newEvent);
-				newWorkPeriod.setWorkDate(newEvent.getEventTime());
+				newWorkPeriod.setWorkStartEvent(newEvent);
+				newWorkPeriod.setWorkStart(newEvent.getEventTime());
 
 				workPeriodRepository.save(newWorkPeriod);
 
